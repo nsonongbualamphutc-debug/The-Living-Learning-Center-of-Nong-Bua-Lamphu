@@ -32,6 +32,10 @@ h1,h2,h3,h4,.display,.num-big{font-family:'Kanit',sans-serif}
 @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 .reveal{opacity:0;animation:rise .7s cubic-bezier(.2,.7,.3,1) forwards}
 .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}.d4{animation-delay:.35s}.d5{animation-delay:.45s}.d6{animation-delay:.55s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+#viewPublic:not(.hide),#viewExec:not(.hide){animation:fade .45s ease}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ad07a;margin-right:6px;vertical-align:middle;animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(74,208,122,.5)}70%{box-shadow:0 0 0 7px rgba(74,208,122,0)}100%{box-shadow:0 0 0 0 rgba(74,208,122,0)}}
 
 .govbar{background:var(--forest-950);color:#dfe8da}
 .govbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 22px;font-size:12.5px}
@@ -162,6 +166,38 @@ tr:hover td{background:var(--gold-soft)}
 .num{text-align:right;font-variant-numeric:tabular-nums}
 .hide{display:none}
 
+/* ===== Satisfaction star panel ===== */
+.sat-box{background:var(--paper);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh-sm);border:1px solid var(--line);margin-bottom:18px}
+.sat-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.sat-top h3{font-family:'Kanit';font-size:16px;font-weight:500;color:var(--forest-900);display:flex;align-items:center;gap:8px}
+.sat-overall{display:flex;align-items:center;gap:20px;background:linear-gradient(120deg,var(--forest-900),var(--forest-700));color:#fff;border-radius:14px;padding:12px 22px;flex-wrap:wrap}
+.so-left{display:flex;align-items:center;gap:13px}
+.so-num{font-family:'Kanit';font-size:30px;font-weight:700;color:var(--gold-bright);line-height:1}
+.so-num small{font-size:15px;color:#cdddc6;font-weight:400}
+.so-right{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.so-pct{font-size:13px;color:#cdddc6}.so-pct b{color:#fff;font-family:'Kanit'}
+.stars{position:relative;display:inline-block;font-size:19px;line-height:1;letter-spacing:2px;font-family:Arial,sans-serif;white-space:nowrap}
+.s-base{color:rgba(255,255,255,.28)}
+.s-fill{color:var(--gold-bright);position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;transition:width 1.1s cubic-bezier(.2,.7,.3,1)}
+.sat-list{display:flex;flex-direction:column;gap:2px}
+.sat-row{display:grid;grid-template-columns:1.5fr auto auto;align-items:center;gap:14px;padding:11px 6px;border-bottom:1px solid var(--line-soft);transition:background .2s}
+.sat-row:last-child{border-bottom:none}
+.sat-row:hover{background:var(--gold-soft);border-radius:8px}
+.sat-name{font-size:14px;color:var(--forest-900);font-weight:500}
+.sat-stars .stars{font-size:17px}
+.sat-stars .s-base{color:#e0dac9}
+.sat-stars .s-fill{color:var(--gold)}
+.sat-meta{display:flex;align-items:center;gap:12px;justify-content:flex-end}
+.sat-val{font-family:'Kanit';font-weight:700;color:var(--forest-900);font-size:16px}
+.sat-pct{font-size:13px;color:var(--muted);min-width:42px;text-align:right}
+.sat-badge{font-family:'Kanit';font-size:12px;font-weight:500;padding:4px 12px;border-radius:14px;white-space:nowrap}
+.sat-badge.l5{background:#EAF3DE;color:#3B6D11}
+.sat-badge.l4{background:#E1F5EE;color:#0F6E56}
+.sat-badge.l3{background:var(--gold-soft);color:#8a6516}
+.sat-badge.l2{background:#FAECE7;color:#a4502a}
+.sat-badge.l1{background:#fbe7e6;color:#b3261e}
+@media(max-width:600px){.sat-row{grid-template-columns:1fr;gap:8px}.sat-stars{order:-1}.sat-meta{justify-content:flex-start}}
+
 /* ===== Drill-down per-center block ===== */
 .drill{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;box-shadow:var(--sh-sm);margin-bottom:18px}
 .drill-top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
@@ -247,7 +283,7 @@ footer.site::before{content:"";position:absolute;inset:0;background-image:radial
 <div class="govbar">
   <div class="wrap">
     <div class="gb-l"><span class="gb-seal">🏛️</span> สำนักงานสถิติจังหวัดหนองบัวลำภู • กระทรวงดิจิทัลเพื่อเศรษฐกิจและสังคม</div>
-    <div class="gb-r">ปรับปรุงล่าสุด <span id="govDate"></span></div>
+    <div class="gb-r"><span class="live-dot"></span>ปรับปรุงล่าสุด <span id="govDate"></span></div>
   </div>
 </div>
 
@@ -315,9 +351,12 @@ footer.site::before{content:"";position:absolute;inset:0;background-image:radial
       <div class="chart-box"><h3>👥 ผู้เข้าชม & ผู้รับการอบรม รายอำเภอ</h3><canvas id="chDistrict"></canvas></div>
       <div class="chart-box"><h3>🗂️ สัดส่วนประเภทศูนย์</h3><canvas id="chType"></canvas></div>
     </div>
-    <div class="chart-row" style="grid-template-columns:1fr 1fr">
+    <div class="chart-row" style="grid-template-columns:1fr">
       <div class="chart-box"><h3>💰 งบประมาณที่ได้รับ รายอำเภอ</h3><canvas id="chBudget"></canvas></div>
-      <div class="chart-box"><h3>⭐ ความพึงพอใจ รายศูนย์</h3><canvas id="chSat"></canvas></div>
+    </div>
+    <div class="sat-box">
+      <div class="sat-top"><h3>⭐ ความพึงพอใจ รายศูนย์</h3><div class="sat-overall" id="satOverall"></div></div>
+      <div class="sat-list" id="satList"></div>
     </div>
 
     <div class="drill">
@@ -409,6 +448,25 @@ function distribute(total,offset){
 const monthlyVisitors=(c,i)=>distribute(c.visitors,i*2);
 const monthlyTrained=(c,i)=>distribute(c.trained,i*2+5);
 
+/* count-up animation for a lively, digital feel */
+function countUp(el,end,dec){
+  const dur=900,t0=performance.now();
+  (function step(t){
+    const p=Math.min((t-t0)/dur,1),e=1-Math.pow(1-p,3),val=end*e;
+    el.textContent=val.toLocaleString('th-TH',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+    if(p<1)requestAnimationFrame(step);
+  })(t0);
+}
+function animAll(root){root.querySelectorAll('.n').forEach(el=>countUp(el,+el.dataset.v,+(el.dataset.dec||0)));}
+function animNum(el,val,dec,suffix){
+  el.innerHTML='<span class="n" data-v="'+val+'" data-dec="'+dec+'">0</span>'+(suffix?'<small>'+suffix+'</small>':'');
+  countUp(el.querySelector('.n'),val,dec);
+}
+/* Thai 5-level satisfaction interpretation */
+const SAT_LEVELS=[{min:4.5,label:'มากที่สุด',cls:'l5'},{min:3.5,label:'มาก',cls:'l4'},{min:2.5,label:'ปานกลาง',cls:'l3'},{min:1.5,label:'น้อย',cls:'l2'},{min:0,label:'น้อยที่สุด',cls:'l1'}];
+const satLevel=v=>SAT_LEVELS.find(l=>v>=l.min);
+const starRow=v=>`<span class="stars"><span class="s-base">★★★★★</span><span class="s-fill" data-w="${(v/5*100).toFixed(1)}%" style="width:0">★★★★★</span></span>`;
+
 let map,markerLayer;
 function initMap(){
   map=L.map('map',{scrollWheelZoom:false}).setView([17.20,102.40],9);
@@ -486,19 +544,22 @@ function buildHero(){
   const v=CENTERS.reduce((a,c)=>a+c.visitors,0);
   const types=new Set(CENTERS.map(c=>c.type)).size;
   heroStats.innerHTML=`
-    <div class="hstat"><div class="hs-ico">🗺️</div><div class="hs-num">6</div><div class="hs-lab">อำเภอ ครบทุกพื้นที่</div></div>
-    <div class="hstat"><div class="hs-ico">🏫</div><div class="hs-num">${CENTERS.length}</div><div class="hs-lab">ศูนย์เรียนรู้</div></div>
-    <div class="hstat"><div class="hs-ico">👥</div><div class="hs-num">${fmt(v)}<small> คน</small></div><div class="hs-lab">ผู้เยี่ยมชม/ปี</div></div>
-    <div class="hstat"><div class="hs-ico">🎯</div><div class="hs-num">${types}</div><div class="hs-lab">ประเภทองค์ความรู้</div></div>`;
+    <div class="hstat"><div class="hs-ico">🗺️</div><div class="hs-num"><span class="n" data-v="6">0</span></div><div class="hs-lab">อำเภอ ครบทุกพื้นที่</div></div>
+    <div class="hstat"><div class="hs-ico">🏫</div><div class="hs-num"><span class="n" data-v="${CENTERS.length}">0</span></div><div class="hs-lab">ศูนย์เรียนรู้</div></div>
+    <div class="hstat"><div class="hs-ico">👥</div><div class="hs-num"><span class="n" data-v="${v}">0</span><small> คน</small></div><div class="hs-lab">ผู้เยี่ยมชม/ปี</div></div>
+    <div class="hstat"><div class="hs-ico">🎯</div><div class="hs-num"><span class="n" data-v="${types}">0</span></div><div class="hs-lab">ประเภทองค์ความรู้</div></div>`;
+  animAll(heroStats);
 }
 
 let charts={};
 function renderExec(){
-  kCenters.innerHTML=CENTERS.length+'<small> ศูนย์</small>';
   const v=CENTERS.reduce((a,c)=>a+c.visitors,0),t=CENTERS.reduce((a,c)=>a+c.trained,0);
   const inc=CENTERS.reduce((a,c)=>a+c.income,0),s=CENTERS.reduce((a,c)=>a+c.satisfaction,0)/CENTERS.length;
-  kVisitors.textContent=fmt(v);kTrained.textContent=fmt(t);
-  kIncome.innerHTML=fmt(inc)+'<small> บ.</small>';kSat.innerHTML=s.toFixed(1)+'<small>/5</small>';
+  animNum(kCenters,CENTERS.length,0,' ศูนย์');
+  animNum(kVisitors,v,0,'');
+  animNum(kTrained,t,0,'');
+  animNum(kIncome,inc,0,' บ.');
+  animNum(kSat,s,1,'/5');
 
   Object.values(charts).forEach(c=>c&&c.destroy());
   Chart.defaults.font.family="'Sarabun',sans-serif";Chart.defaults.font.size=12.5;Chart.defaults.color="#7a7a6a";
@@ -520,13 +581,32 @@ function renderExec(){
     data:CENTERS.map(c=>c.budget),backgroundColor:'#2f6ea3',borderRadius:6,maxBarThickness:26}]},
     options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid},y:{grid:{display:false}}}}});
 
-  charts.s=new Chart(chSat,{type:'bar',data:{labels:CENTERS.map(c=>c.name.length>14?c.name.slice(0,14)+'…':c.name),
-    datasets:[{label:'พึงพอใจ',data:CENTERS.map(c=>c.satisfaction),backgroundColor:'#159486',borderRadius:6,maxBarThickness:30}]},
-    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:5,grid},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  renderSatPanel();
 
   execTable.innerHTML=CENTERS.map(c=>`<tr><td>${c.name}</td><td>อ.${c.district}</td><td>${c.type}</td>
     <td class="num">${fmt(c.visitors)}</td><td class="num">${fmt(c.trained)}</td><td class="num">${fmt(c.income)}</td>
     <td class="num">${fmt(c.budget)}</td><td class="num">${c.satisfaction}</td></tr>`).join('');
+}
+
+function renderSatPanel(){
+  const avg=CENTERS.reduce((a,c)=>a+c.satisfaction,0)/CENTERS.length;
+  const lv=satLevel(avg),pct=avg/5*100;
+  satOverall.innerHTML=`
+    <div class="so-left">
+      <div class="so-num"><span class="n" data-v="${avg.toFixed(2)}" data-dec="2">0</span><small>/5</small></div>
+      ${starRow(avg)}
+    </div>
+    <div class="so-right">
+      <div class="so-pct">เฉลี่ยรวม ร้อยละ <b><span class="n" data-v="${pct.toFixed(1)}" data-dec="1">0</span></b></div>
+      <span class="sat-badge ${lv.cls}">อยู่ในระดับ ${lv.label}</span>
+    </div>`;
+  satList.innerHTML=CENTERS.map(c=>{const l=satLevel(c.satisfaction);return `<div class="sat-row">
+    <div class="sat-name">${c.name}</div>
+    <div class="sat-stars">${starRow(c.satisfaction)}</div>
+    <div class="sat-meta"><span class="sat-val">${c.satisfaction.toFixed(1)}</span><span class="sat-pct">${(c.satisfaction/5*100).toFixed(0)}%</span><span class="sat-badge ${l.cls}">${l.label}</span></div>
+  </div>`;}).join('');
+  animAll(satOverall);
+  setTimeout(()=>document.querySelectorAll('.sat-box .s-fill').forEach(f=>f.style.width=f.dataset.w),80);
 }
 
 /* ===================== Drill-down ===================== */

@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&family=Maitree:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
   --forest-950:#0f2818;--forest-900:#14331f;--forest-800:#1c4a2c;--forest-700:#266038;
@@ -153,7 +154,53 @@ footer.site{background:var(--teal);color:#fff}
 .foot-bar{padding:16px 24px;font-size:12.5px;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px 26px;text-align:center}
 .foot-bar .links a{color:#fff;opacity:.92;text-decoration:none;margin:0 9px}
 .disclaimer{text-align:center;color:var(--muted);font-size:12px;padding:16px 22px 22px}
-#notfound{text-align:center;padding:90px 22px;color:var(--muted)}
+/* Block: VIDEO */
+.s-video{background:var(--forest-950);color:#fff}
+.s-video .sec-label{color:var(--gold-bright)}
+.s-video .sec-title{color:#fff}
+.video-box{position:relative;width:100%;max-width:880px;aspect-ratio:16/9;border-radius:var(--r);overflow:hidden;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14)}
+.video-box iframe{width:100%;height:100%;border:0;display:block}
+.video-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  color:rgba(255,255,255,.55);background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.02) 0 12px,transparent 12px 24px)}
+.video-ph .vp-play{width:64px;height:64px;border-radius:50%;background:rgba(226,168,44,.18);border:1px solid rgba(226,168,44,.35);
+  display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--gold-bright)}
+.video-ph .vp-tx{font-family:'Kanit';font-size:15px}
+.video-ph .vp-note{font-size:12px;color:rgba(255,255,255,.4)}
+
+/* Block: SHARE + QR */
+.s-share{background:var(--cream)}
+.share-grid{display:grid;grid-template-columns:1.4fr auto;gap:24px;align-items:center;background:var(--paper);
+  border:1px solid var(--line);border-radius:var(--r);padding:26px 28px;box-shadow:var(--sh-sm)}
+.share-card h3{font-size:20px;font-weight:600;color:var(--forest-900);margin-bottom:6px}
+.share-card p{font-size:14px;color:var(--muted);margin-bottom:16px}
+.share-btns{display:flex;gap:11px;flex-wrap:wrap}
+.share-btn{font-family:'Kanit';font-size:14.5px;font-weight:500;padding:11px 20px;border-radius:11px;border:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;transition:.18s}
+.share-btn.primary{background:var(--forest-800);color:#fff}.share-btn.primary:hover{background:var(--forest-900)}
+.share-btn.ghost{background:#fff;color:var(--forest-700);border:1.5px solid var(--leaf)}.share-btn.ghost:hover{background:var(--leaf-soft)}
+.qr-card{text-align:center;display:flex;flex-direction:column;align-items:center;gap:9px}
+.qr-card #qrbox{padding:10px;background:#fff;border:1px solid var(--line);border-radius:14px;line-height:0}
+.qr-card #qrbox img,.qr-card #qrbox canvas{border-radius:6px}
+.qr-card span{font-size:12.5px;color:var(--muted)}
+.copied{font-size:12.5px;color:var(--leaf);font-weight:600;opacity:0;transition:.3s}
+.copied.show{opacity:1}
+
+/* Block: PREV / NEXT */
+.prevnext{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:28px 0 8px}
+.pn{display:flex;flex-direction:column;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px 20px;text-decoration:none;transition:.2s}
+.pn:hover{border-color:var(--leaf);transform:translateY(-3px);box-shadow:var(--sh)}
+.pn .pn-dir{font-family:'Kanit';font-size:12.5px;color:var(--muted);font-weight:500}
+.pn .pn-name{font-family:'Kanit';font-size:15.5px;font-weight:600;color:var(--forest-900)}
+.pn.next{text-align:right}
+
+@media(max-width:560px){
+  .share-grid{grid-template-columns:1fr;text-align:center}
+  .share-btns{justify-content:center}
+  .prevnext{grid-template-columns:1fr}
+  .pn.next{text-align:left}
+}
 
 @media(max-width:820px){
   .hero-grid{grid-template-columns:1fr}
@@ -175,7 +222,7 @@ footer.site{background:var(--teal);color:#fff}
 
 <div class="topnav">
   <div class="wrap">
-    <a class="back" href="index.html">← กลับหน้ารวมศูนย์</a>
+    <a class="back" href="dashboard_learning_centers.html">← กลับหน้ารวมศูนย์</a>
     <span class="tn-name" id="tnName"></span>
   </div>
 </div>
@@ -203,7 +250,7 @@ const DETAILS=[
 { // 0
   name:"กลุ่มปลูกผักอินทรีย์บ้านโพธิ์ศรีสำราญ",type:"เกษตรอินทรีย์",district:"เมืองหนองบัวลำภู",tambon:"หัวนา",
   emoji:"🥬",lat:17.205,lng:102.442,contact:"นางประดับ สมณะ (ผู้ใหญ่บ้าน หมู่ 13)",phone:"081-0568544",
-  visitors:280,trained:240,income:120000,satisfaction:4.4,images:[],
+  visitors:280,trained:240,income:120000,satisfaction:4.4,images:[],video:"",
   facts:[{ico:"📅",v:"พ.ศ. 2554",l:"ปีที่เริ่มก่อตั้ง"},{ico:"🌱",v:"8 ไร่",l:"พื้นที่สาธารณะ"},
     {ico:"👨‍🌾",v:"38 ราย",l:"สมาชิกกลุ่ม"},{ico:"🩺",v:"66% → 0%",l:"สารเคมีในเลือดที่ลดลง"}],
   story:["ในปี พ.ศ. 2554 หมู่บ้านโพธิ์ศรีสำราญได้เข้าร่วมโครงการ \"หนึ่งครัวเรือนหนึ่งกระถาง\" ของเทศบาลตำบลหัวนา จากนั้นจึงขยายพื้นที่ทำการปลูกผักอินทรีย์ โดยประชาคมขอใช้พื้นที่หนองน้ำสาธารณะกุดตาแมว จัดแปลงปลูกผักกว้าง 5 เมตร เริ่มจากสมาชิก 46 คน ปลูกผักไว้กินในครัวเรือน เหลือกินจึงนำไปขาย",
@@ -220,7 +267,7 @@ const DETAILS=[
 { // 1
   name:"ศูนย์เรียนรู้ป่ารักษ์น้ำ",type:"ปรัชญาเศรษฐกิจพอเพียง",district:"นาวัง",tambon:"นาเหล่า",
   emoji:"🌳",lat:17.452,lng:102.302,contact:"นางสาวพัชรินทร์ ศรีด้วง (เจ้าหน้าที่ปกครองอำเภอนาวัง)",phone:"065-3219730",
-  visitors:420,trained:100,income:80000,satisfaction:4.6,images:[],
+  visitors:420,trained:100,income:80000,satisfaction:4.6,images:[],video:"",
   facts:[{ico:"👑",v:"พ.ศ. 2541",l:"ปีเสด็จฯ เยี่ยมราษฎร"},{ico:"💧",v:"5 ไร่",l:"อ่างเก็บน้ำซำปาคาด"},
     {ico:"🏠",v:"2 แห่ง",l:"โรงเรือน"},{ico:"📚",v:"6 ฐาน",l:"ฐานเรียนรู้"}],
   story:["สมเด็จพระนางเจ้าสิริกิติ์ พระบรมราชินีนาถ พระบรมราชชนนีพันปีหลวง เสด็จพระราชดำเนินเยี่ยมราษฎรอำเภอนาวัง ณ บ้านหนองหินตั้ง ตำบลนาเหล่า เมื่อวันที่ 15 ธันวาคม พ.ศ. 2541 เพื่อติดตามกลุ่มศิลปาชีพและการส่งเสริมอาชีพให้แก่ราษฎร",
@@ -239,7 +286,7 @@ const DETAILS=[
 { // 2
   name:"ศูนย์ ศพก. อำเภอสุวรรณคูหา",type:"เกษตรผสมผสาน",district:"สุวรรณคูหา",tambon:"ดงมะไฟ",
   emoji:"🌾",lat:17.553,lng:102.183,contact:"นายมนวัฒน์ บุณยพรหม (เกษตรอำเภอสุวรรณคูหา)",phone:"084-3370262",
-  visitors:650,trained:300,income:180000,satisfaction:4.7,images:[],
+  visitors:650,trained:300,income:180000,satisfaction:4.7,images:[],video:"",
   facts:[{ico:"🗺️",v:"24 ไร่",l:"พื้นที่ แบ่ง 4 ส่วน"},{ico:"📚",v:"6 ฐาน",l:"ฐานเรียนรู้"},
     {ico:"🌾",v:"4 แปลง",l:"แปลงเรียนรู้"},{ico:"♻️",v:"BCG",l:"โมเดลเศรษฐกิจ"}],
   story:["ศูนย์เรียนรู้การเพิ่มประสิทธิภาพการผลิตสินค้าเกษตร (ศพก.) อำเภอสุวรรณคูหา เป็นศูนย์เรียนรู้ด้านเศรษฐกิจพอเพียง เกษตรทฤษฎีใหม่ และเกษตรผสมผสาน ที่เน้นองค์ความรู้ในการปลูกพืชแบบผสมผสานตามหลักปรัชญาเศรษฐกิจพอเพียง",
@@ -259,7 +306,7 @@ const DETAILS=[
 { // 3
   name:"วิสาหกิจชุมชนแปลงใหญ่ข้าวอุทัยสวรรค์",type:"วิสาหกิจชุมชน",district:"นากลาง",tambon:"อุทัยสวรรค์",
   emoji:"🍚",lat:17.322,lng:102.312,contact:"นางโสภา มุมวัน (ประธาน)",phone:"086-2200224",
-  visitors:380,trained:150,income:450000,satisfaction:4.5,images:[],
+  visitors:380,trained:150,income:450000,satisfaction:4.5,images:[],video:"",
   facts:[{ico:"📅",v:"พ.ศ. 2565",l:"จดทะเบียนวิสาหกิจชุมชน"},{ico:"🌾",v:"615 ไร่",l:"พื้นที่ปลูกข้าว"},
     {ico:"👥",v:"63 ราย",l:"สมาชิก"},{ico:"⚖️",v:"400 กก./ไร่",l:"ผลผลิตเฉลี่ย"}],
   story:["บ้านหนองกุงศรี หมู่ที่ 10 ตำบลอุทัยสวรรค์ เป็นพื้นที่เหมาะสมแก่การปลูกข้าว ในปี พ.ศ. 2562 ได้ขึ้นทะเบียนกับสำนักส่งเสริมการผลิตข้าว จัดตั้งเป็นศูนย์ข้าวชุมชนอุทัยสวรรค์ เพื่อผลิตเมล็ดพันธุ์ข้าวจำหน่าย",
@@ -277,7 +324,7 @@ const DETAILS=[
 { // 4
   name:"ค่ายคนดีศรีบุญเรือง",type:"ปรัชญาเศรษฐกิจพอเพียง",district:"ศรีบุญเรือง",tambon:"เมืองใหม่",
   emoji:"🏕️",lat:16.972,lng:102.272,contact:"นางสาวศิริพร เนธิบุตร (ปลัดอำเภอ)",phone:"063-9013027",
-  visitors:200,trained:90,income:40000,satisfaction:4.2,images:[],
+  visitors:200,trained:90,income:40000,satisfaction:4.2,images:[],video:"",
   facts:[{ico:"🗺️",v:"15 ไร่ 3 งาน",l:"พื้นที่ทั้งหมด"},{ico:"🏢",v:"3 งาน 11 ตร.ว.",l:"อาคารสำนักงาน"},
     {ico:"🍄",v:"1 ไร่เศษ",l:"โรงเรือนเพาะเห็ด/เลี้ยงสัตว์"},{ico:"💚",v:"บำบัด+อาชีพ",l:"คืนคนดีสู่สังคม"}],
   story:["ค่ายคนดีศรีบุญเรือง ตั้งอยู่ที่กองร้อยอาสาสมัครรักษาดินแดนอำเภอศรีบุญเรือง ที่ 4 เกิดขึ้นจากนโยบายเชิงรุกในการป้องกัน ปราบปราม และแก้ไขปัญหายาเสพติด",
@@ -294,7 +341,7 @@ const DETAILS=[
 { // 5
   name:"ศูนย์เรียนรู้โคกหนองโดนโมเดล",type:"เกษตรผสมผสาน",district:"โนนสัง",tambon:"กุดดู่",
   emoji:"⛰️",lat:17.002,lng:102.572,contact:"นายเกรียงไกร ไทยอ่อน (ประธานศูนย์)",phone:"081-9846526",
-  visitors:340,trained:120,income:95000,satisfaction:4.5,images:[],
+  visitors:340,trained:120,income:95000,satisfaction:4.5,images:[],video:"",
   facts:[{ico:"⚖️",v:"30:30:30:10",l:"สัดส่วน น้ำ:นา:ป่า:ที่อยู่"},{ico:"🌱",v:"5 ระดับ",l:"การปลูกพืช"},
     {ico:"🗺️",v:"1–3 ไร่",l:"ขนาดแปลงต้นแบบ"},{ico:"💧",v:"โคก หนอง นา",l:"โมเดลจัดการน้ำ"}],
   story:["ศูนย์เรียนรู้โคกหนองโดนโมเดล เกิดจากการน้อมนำแนวทาง \"โคก หนอง นา โมเดล\" หรือการบริหารจัดการน้ำและพื้นที่การเกษตรตามหลักทฤษฎีใหม่ มาปรับใช้ในพื้นที่บ้านหนองโดน ตำบลกุดดู่",
@@ -334,6 +381,9 @@ function gallery(imgs){
 
 function render(c){
   const col=TYPE_COLORS[c.type]||'#4a8c3f';
+  const id=DETAILS.indexOf(c);
+  const prev=(id-1+DETAILS.length)%DETAILS.length;
+  const next=(id+1)%DETAILS.length;
   document.getElementById('tnName').textContent=c.name;
   document.title=c.name+' | ศูนย์เรียนรู้หนองบัวลำภู';
 
@@ -384,6 +434,12 @@ function render(c){
     <div class="bases">${bases}</div>
   </div></section>
 
+  <section class="s-video"><div class="wrap reveal">
+    <div class="sec-label">วิดีโอ · Video</div>
+    <h2 class="sec-title">วิดีโอแนะนำศูนย์</h2>
+    <div class="video-box">${c.video?`<iframe src="${c.video}" allowfullscreen loading="lazy"></iframe>`:`<div class="video-ph"><div class="vp-play">▶</div><div class="vp-tx">โปรดนำวิดีโอเข้า</div><div class="vp-note">วิดีโอจะแสดงเมื่อนำเข้าผ่านระบบหลังบ้าน</div></div>`}</div>
+  </div></section>
+
   <section class="s-products"><div class="wrap reveal">
     <div class="sec-label">ผลผลิต · Products</div>
     <h2 class="sec-title">พืชผลและผลิตภัณฑ์</h2>
@@ -413,6 +469,28 @@ function render(c){
         <a class="go-btn" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}">🧭 เปิดนำทางด้วย Google Maps</a>
       </div>
     </div>
+  </div></section>
+
+  <section class="s-share"><div class="wrap reveal">
+    <div class="share-grid">
+      <div class="share-card">
+        <h3>แชร์ศูนย์นี้</h3>
+        <p>ส่งให้เพื่อนหรือผู้สนใจ หรือสแกน QR เพื่อเปิดหน้านี้บนมือถือ</p>
+        <div class="share-btns">
+          <button class="share-btn primary" onclick="doShare()">🔗 แชร์</button>
+          <button class="share-btn ghost" onclick="copyLink()">📋 คัดลอกลิงก์</button>
+          <span class="copied" id="copied">คัดลอกแล้ว ✓</span>
+        </div>
+      </div>
+      <div class="qr-card">
+        <div id="qrbox"></div>
+        <span>สแกนเพื่อเปิดหน้านี้</span>
+      </div>
+    </div>
+    <div class="prevnext">
+      <a class="pn prev" href="detail.html?id=${prev}"><span class="pn-dir">← ศูนย์ก่อนหน้า</span><span class="pn-name">${DETAILS[prev].name}</span></a>
+      <a class="pn next" href="detail.html?id=${next}"><span class="pn-dir">ศูนย์ถัดไป →</span><span class="pn-name">${DETAILS[next].name}</span></a>
+    </div>
   </div></section>`;
 
   // gallery thumb swap
@@ -431,11 +509,24 @@ function render(c){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(map);
   const icon=L.divIcon({className:'',html:`<div style="background:${col};width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:17px">${c.emoji}</span></div>`,iconSize:[36,36],iconAnchor:[18,36]});
   L.marker([c.lat,c.lng],{icon}).addTo(map);
+
+  // QR code of this page
+  try{new QRCode(document.getElementById('qrbox'),{text:location.href,width:118,height:118,colorDark:'#14331f',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+}
+
+function doShare(){
+  const data={title:document.title,text:'ศูนย์เรียนรู้ จังหวัดหนองบัวลำภู',url:location.href};
+  if(navigator.share){navigator.share(data).catch(()=>{});}else{copyLink();}
+}
+function copyLink(){
+  const done=()=>{const c=document.getElementById('copied');if(c){c.classList.add('show');setTimeout(()=>c.classList.remove('show'),2000);}};
+  if(navigator.clipboard){navigator.clipboard.writeText(location.href).then(done).catch(done);}
+  else{const t=document.createElement('textarea');t.value=location.href;document.body.appendChild(t);t.select();try{document.execCommand('copy');}catch(e){}t.remove();done();}
 }
 
 const id=parseInt(new URLSearchParams(location.search).get('id'),10);
 if(isNaN(id)||!DETAILS[id]){
-  document.getElementById('content').innerHTML='<div id="notfound"><h2 style="color:var(--forest-900);margin-bottom:10px">ไม่พบข้อมูลศูนย์</h2><p>กรุณากลับไปเลือกศูนย์จากหน้ารวม</p><p style="margin-top:18px"><a href="index.html" style="color:var(--leaf);font-weight:600">← กลับหน้ารวมศูนย์</a></p></div>';
+  document.getElementById('content').innerHTML='<div id="notfound"><h2 style="color:var(--forest-900);margin-bottom:10px">ไม่พบข้อมูลศูนย์</h2><p>กรุณากลับไปเลือกศูนย์จากหน้ารวม</p><p style="margin-top:18px"><a href="dashboard_learning_centers.html" style="color:var(--leaf);font-weight:600">← กลับหน้ารวมศูนย์</a></p></div>';
 }else{
   render(DETAILS[id]);
 }
