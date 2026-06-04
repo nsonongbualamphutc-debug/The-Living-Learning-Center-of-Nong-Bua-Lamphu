@@ -25,6 +25,7 @@ const ASPECTS = ['q_content','q_speaker','q_place','q_apply','q_overall'];
 
 /* ---------- Web app entry (JSONP) ---------- */
 function doGet(e){
+  e = e || {}; e.parameter = e.parameter || {};
   var out;
   try { out = route(e.parameter); }
   catch(err){ out = { ok:false, error:String(err) }; }
@@ -52,6 +53,7 @@ function route(p){
 function doPost(e){
   var out;
   try {
+    if (!e || !e.postData) throw 'ไม่มีข้อมูลที่ส่งเข้ามา (ฟังก์ชันนี้ทำงานผ่าน Web app เท่านั้น)';
     var d = JSON.parse(e.postData.contents);
     if (d.action === 'uploadImage') out = uploadImage(d);
     else out = { ok:false, error:'unknown action' };
