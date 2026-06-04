@@ -541,7 +541,7 @@ function copyLink(){
   else{const t=document.createElement('textarea');t.value=location.href;document.body.appendChild(t);t.select();try{document.execCommand('copy');}catch(e){}t.remove();done();}
 }
 
-const CONFIG={GAS_URL:''};   // ว่าง = ใช้ข้อมูลตัวอย่าง
+const CONFIG={GAS_URL:'https://script.google.com/macros/s/AKfycbxBaLvvyeQYE2nuPPC8K5aA6cPL7s6Chab7WWhR1PoWu1X3s3uR-Wc0AUmeypjyLrtk/exec'};   // ว่าง = ใช้ข้อมูลตัวอย่าง
 function jsonp(url,params,cb){
   const name='cb_'+Math.random().toString(36).slice(2); params.callback=name;
   const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
