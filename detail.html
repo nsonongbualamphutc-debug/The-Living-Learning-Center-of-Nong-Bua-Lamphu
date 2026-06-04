@@ -222,7 +222,7 @@ footer.site{background:var(--teal);color:#fff}
 
 <div class="topnav">
   <div class="wrap">
-    <a class="back" href="dashboard_learning_centers.html">← กลับหน้ารวมศูนย์</a>
+    <a class="back" href="index.html">← กลับหน้ารวมศูนย์</a>
     <span class="tn-name" id="tnName"></span>
   </div>
 </div>
@@ -526,7 +526,7 @@ function copyLink(){
 
 const id=parseInt(new URLSearchParams(location.search).get('id'),10);
 if(isNaN(id)||!DETAILS[id]){
-  document.getElementById('content').innerHTML='<div id="notfound"><h2 style="color:var(--forest-900);margin-bottom:10px">ไม่พบข้อมูลศูนย์</h2><p>กรุณากลับไปเลือกศูนย์จากหน้ารวม</p><p style="margin-top:18px"><a href="dashboard_learning_centers.html" style="color:var(--leaf);font-weight:600">← กลับหน้ารวมศูนย์</a></p></div>';
+  document.getElementById('content').innerHTML='<div id="notfound"><h2 style="color:var(--forest-900);margin-bottom:10px">ไม่พบข้อมูลศูนย์</h2><p>กรุณากลับไปเลือกศูนย์จากหน้ารวม</p><p style="margin-top:18px"><a href="index.html" style="color:var(--leaf);font-weight:600">← กลับหน้ารวมศูนย์</a></p></div>';
 }else{
   render(DETAILS[id]);
 }
