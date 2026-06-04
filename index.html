@@ -135,6 +135,8 @@ h1,h2,h3,h4,.display,.num-big{font-family:'Kanit',sans-serif}
 .btn-go:hover{background:var(--forest-900)}
 .btn-info{background:#fff;color:var(--forest-700);border:1.5px solid var(--leaf)}
 .btn-info:hover{background:var(--leaf-soft)}
+.btn-detail{background:var(--gold);color:#fff;width:100%;margin-top:9px}
+.btn-detail:hover{background:#b3831f}
 
 .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px}
 .kpi-card{background:var(--paper);border-radius:var(--r);padding:22px;box-shadow:var(--sh-sm);border:1px solid var(--line);position:relative;overflow:hidden}
@@ -451,6 +453,7 @@ function render(){
   drawMarkers(list);
   cardGrid.innerHTML=list.map((c,i)=>{
     const col=TYPE_COLORS[c.type]||'#4a8c3f';
+    const gid=CENTERS.indexOf(c);
     const amen=Object.keys(AMEN).map(k=>`<span class="${c.amenities[k]?'on':''}" title="${AMEN[k][1]}">${AMEN[k][0]}</span>`).join('');
     return `<div class="card" style="animation:rise .5s ${i*.05}s both">
       <div class="card-photo" style="background:linear-gradient(135deg,${col}22,${col}0d)">
@@ -474,6 +477,7 @@ function render(){
           <a class="btn btn-go" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}">🧭 นำทาง</a>
           <a class="btn btn-info" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}">🗺️ ดูแผนที่</a>
         </div>
+        <a class="btn btn-detail" href="detail.html?id=${gid}">📖 ดูรายละเอียดศูนย์</a>
       </div></div>`;
   }).join('');
 }
