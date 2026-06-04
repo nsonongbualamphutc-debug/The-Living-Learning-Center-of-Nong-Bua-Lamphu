@@ -222,7 +222,7 @@ footer.site{background:var(--teal);color:#fff}
 
 <div class="topnav">
   <div class="wrap">
-    <a class="back" href="index.html">← กลับหน้ารวมศูนย์</a>
+    <a class="back" href="dashboard_learning_centers.html">← กลับหน้ารวมศูนย์</a>
     <span class="tn-name" id="tnName"></span>
   </div>
 </div>
@@ -474,10 +474,23 @@ function render(c){
   <section class="s-share"><div class="wrap reveal">
     <div class="share-grid">
       <div class="share-card">
-        <h3>แชร์ศูนย์นี้</h3>
-        <p>ส่งให้เพื่อนหรือผู้สนใจ หรือสแกน QR เพื่อเปิดหน้านี้บนมือถือ</p>
+        <h3>⭐ ร่วมประเมินความพึงพอใจ</h3>
+        <p>สำหรับผู้เข้าชมและผู้เข้าอบรม — สแกน QR หรือกดปุ่มเพื่อให้คะแนนศูนย์นี้</p>
         <div class="share-btns">
-          <button class="share-btn primary" onclick="doShare()">🔗 แชร์</button>
+          <a class="share-btn primary" href="survey.html?id=${id}">📝 ให้คะแนนศูนย์นี้</a>
+        </div>
+      </div>
+      <div class="qr-card">
+        <div id="qrSurvey"></div>
+        <span>สแกนเพื่อให้คะแนน</span>
+      </div>
+    </div>
+    <div class="share-grid" style="margin-top:16px">
+      <div class="share-card">
+        <h3>🔗 แชร์ศูนย์นี้</h3>
+        <p>ส่งหน้านี้ให้เพื่อนหรือผู้สนใจ เพื่อชวนมาศึกษาดูงาน</p>
+        <div class="share-btns">
+          <button class="share-btn primary" onclick="doShare()">แชร์</button>
           <button class="share-btn ghost" onclick="copyLink()">📋 คัดลอกลิงก์</button>
           <span class="copied" id="copied">คัดลอกแล้ว ✓</span>
         </div>
@@ -510,8 +523,12 @@ function render(c){
   const icon=L.divIcon({className:'',html:`<div style="background:${col};width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:17px">${c.emoji}</span></div>`,iconSize:[36,36],iconAnchor:[18,36]});
   L.marker([c.lat,c.lng],{icon}).addTo(map);
 
-  // QR code of this page
-  try{new QRCode(document.getElementById('qrbox'),{text:location.href,width:118,height:118,colorDark:'#14331f',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+  // QR codes: survey (ให้คะแนน) + this page (share)
+  try{
+    var surveyURL=new URL('survey.html?id='+id, location.href).href;
+    new QRCode(document.getElementById('qrSurvey'),{text:surveyURL,width:118,height:118,colorDark:'#1c4a2c',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    new QRCode(document.getElementById('qrbox'),{text:location.href,width:118,height:118,colorDark:'#14331f',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  }catch(e){}
 }
 
 function doShare(){
@@ -524,11 +541,34 @@ function copyLink(){
   else{const t=document.createElement('textarea');t.value=location.href;document.body.appendChild(t);t.select();try{document.execCommand('copy');}catch(e){}t.remove();done();}
 }
 
+const CONFIG={GAS_URL:''};   // ว่าง = ใช้ข้อมูลตัวอย่าง
+function jsonp(url,params,cb){
+  const name='cb_'+Math.random().toString(36).slice(2); params.callback=name;
+  const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
+  window[name]=d=>{cb(d);delete window[name];s.remove();};
+  const s=document.createElement('script'); s.src=url+'?'+qs;
+  s.onerror=()=>{cb(null);delete window[name];s.remove();};
+  document.body.appendChild(s);
+}
+
 const id=parseInt(new URLSearchParams(location.search).get('id'),10);
 if(isNaN(id)||!DETAILS[id]){
-  document.getElementById('content').innerHTML='<div id="notfound"><h2 style="color:var(--forest-900);margin-bottom:10px">ไม่พบข้อมูลศูนย์</h2><p>กรุณากลับไปเลือกศูนย์จากหน้ารวม</p><p style="margin-top:18px"><a href="index.html" style="color:var(--leaf);font-weight:600">← กลับหน้ารวมศูนย์</a></p></div>';
+  document.getElementById('content').innerHTML='<div id="notfound"><h2 style="color:var(--forest-900);margin-bottom:10px">ไม่พบข้อมูลศูนย์</h2><p>กรุณากลับไปเลือกศูนย์จากหน้ารวม</p><p style="margin-top:18px"><a href="dashboard_learning_centers.html" style="color:var(--leaf);font-weight:600">← กลับหน้ารวมศูนย์</a></p></div>';
 }else{
   render(DETAILS[id]);
+  if(CONFIG.GAS_URL){
+    jsonp(CONFIG.GAS_URL,{action:'getCenter',id:id},r=>{
+      if(r&&r.center){ const c=r.center;
+        // เก็บเนื้อหาเชิงบรรยายจากตัวอย่างไว้หากชีตยังว่าง
+        const base=DETAILS[id];
+        ['story','bases','products','facts','upcoming','video','images'].forEach(k=>{
+          if((Array.isArray(c[k])&&!c[k].length)||!c[k]) c[k]=base[k];
+        });
+        if(!c.facts) c.facts=base.facts;
+        render(c);
+      }
+    });
+  }
 }
 </script>
 </body>

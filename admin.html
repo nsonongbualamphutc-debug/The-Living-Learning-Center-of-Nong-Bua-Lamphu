@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบกรอกข้อมูลศูนย์ | หนองบัวลำภู</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest-900:#14331f;--forest-800:#1c4a2c;--forest-700:#266038;--leaf:#4a8c3f;--leaf-soft:#e8f0df;
+  --gold:#c8962b;--gold-bright:#e2a82c;--gold-soft:#f5ebd4;--cream:#f6f2e8;--paper:#fffdf7;
+  --ink:#23251c;--muted:#7a7a6a;--line:#e6e1d3;--teal:#159486;--r:16px;--sh:0 4px 18px rgba(20,40,20,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun',sans-serif;background:var(--cream);color:var(--ink);line-height:1.6}
+h1,h2,h3,.k{font-family:'Kanit',sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:22px 18px 60px}
+.topbar{background:var(--forest-900);color:#fff;padding:14px 18px;text-align:center;font-family:'Kanit';font-weight:500;font-size:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:24px;margin-top:18px}
+
+/* login */
+.login{max-width:420px;margin:30px auto}
+.login h2{font-size:20px;color:var(--forest-900);margin-bottom:4px}
+.login p{font-size:13.5px;color:var(--muted);margin-bottom:18px}
+label{font-family:'Kanit';font-size:13px;font-weight:500;color:var(--forest-900);display:block;margin:14px 0 5px}
+select,input,textarea{width:100%;font-family:'Sarabun';font-size:14.5px;padding:11px 13px;border:1px solid var(--line);
+  border-radius:10px;background:#fff;color:var(--ink)}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 3px rgba(74,140,63,.13)}
+textarea{resize:vertical;min-height:64px}
+.btn{font-family:'Kanit';font-size:15.5px;font-weight:500;color:#fff;background:var(--forest-800);border:none;
+  border-radius:11px;padding:13px 24px;cursor:pointer;transition:.18s}
+.btn:hover{background:var(--forest-900)}.btn:disabled{opacity:.55}
+.btn-block{width:100%;margin-top:20px}
+.msg{padding:11px 14px;border-radius:10px;font-size:13.5px;margin-top:14px;display:none}
+.msg.ok{background:var(--leaf-soft);color:var(--forest-700);display:block}
+.msg.bad{background:#fbe7e6;color:#b3261e;display:block}
+
+/* form */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.fieldset{border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+.fieldset legend{font-family:'Kanit';font-weight:600;color:var(--forest-800);padding:0 8px;font-size:14.5px}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.toggles{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.tog{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:14px;cursor:pointer}
+.tog input{width:auto}
+.readonly-note{background:var(--gold-soft);border-radius:10px;padding:12px 14px;font-size:13px;color:#7a5a14;margin-top:8px}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.who{font-family:'Kanit';color:var(--forest-800);font-weight:500}
+.demo{background:var(--gold-soft);color:#7a5a14;text-align:center;padding:10px;font-size:13px;border-radius:10px;margin-top:14px;display:none}
+</style>
+</head>
+<body>
+<div class="topbar">🔐 ระบบกรอกข้อมูลศูนย์เรียนรู้ — สำหรับเจ้าหน้าที่ประจำศูนย์</div>
+<div class="wrap">
+
+  <!-- LOGIN -->
+  <div class="card login" id="loginCard">
+    <h2>เข้าสู่ระบบ</h2>
+    <p>เลือกศูนย์ของท่าน และกรอกรหัส PIN ที่ได้รับจากจังหวัด</p>
+    <label>ศูนย์เรียนรู้</label>
+    <select id="loginCenter"><option>กำลังโหลด...</option></select>
+    <label>รหัส PIN</label>
+    <input id="loginPin" type="password" inputmode="numeric" placeholder="••••" maxlength="6">
+    <button class="btn btn-block" id="loginBtn" onclick="login()">เข้าสู่ระบบ</button>
+    <div class="msg" id="loginMsg"></div>
+    <div class="demo" id="demoNote">⚠️ ยังไม่ได้เชื่อมต่อระบบหลังบ้าน (กรอก CONFIG.GAS_URL) — แสดงโหมดสาธิต</div>
+  </div>
+
+  <!-- EDITOR -->
+  <div id="editor" style="display:none">
+    <div class="card">
+      <div class="bar"><span class="who" id="whoName"></span>
+        <button class="btn" style="background:var(--muted);margin-left:auto;padding:9px 16px;font-size:13.5px" onclick="logout()">ออกจากระบบ</button>
+      </div>
+      <div class="readonly-note">⭐ <b>ความพึงพอใจ</b> ไม่ต้องกรอกที่นี่ — ระบบคำนวณจากแบบประเมินของผู้เข้าชม/ผู้อบรมโดยอัตโนมัติ</div>
+
+      <fieldset class="fieldset"><legend>ข้อมูลทั่วไป</legend>
+        <label>ชื่อศูนย์</label><input id="f_name">
+        <div class="grid3">
+          <div><label>ประเภท</label>
+            <select id="f_type"><option>เกษตรอินทรีย์</option><option>เกษตรผสมผสาน</option><option>วิสาหกิจชุมชน</option><option>ปรัชญาเศรษฐกิจพอเพียง</option><option>ปศุสัตว์</option><option>ประมง</option></select></div>
+          <div><label>ตำบล</label><input id="f_tambon"></div>
+          <div><label>ไอคอน (อิโมจิ)</label><input id="f_emoji" maxlength="4"></div>
+        </div>
+        <div class="grid2">
+          <div><label>ผู้ประสานงาน</label><input id="f_contact"></div>
+          <div><label>เบอร์โทร</label><input id="f_phone"></div>
+        </div>
+        <label>จุดเด่น (แสดงบนการ์ด ≤150 ตัวอักษร)</label><input id="f_highlight" maxlength="150">
+      </fieldset>
+
+      <fieldset class="fieldset"><legend>ตำแหน่งที่ตั้ง (พิกัด GPS จริง)</legend>
+        <div class="grid2">
+          <div><label>ละติจูด (Lat)</label><input id="f_lat" inputmode="decimal"></div>
+          <div><label>ลองจิจูด (Lng)</label><input id="f_lng" inputmode="decimal"></div>
+        </div>
+        <div class="hint">เปิด Google Maps → คลิกขวาที่ตั้งศูนย์ → คัดลอกตัวเลข 2 ชุด (เช่น 17.5530, 102.1830)</div>
+        <div class="grid3">
+          <div><label>เวลาเปิด-ปิด</label><input id="f_hours" placeholder="08:30-16:30"></div>
+          <div><label>วันเปิด</label><select id="f_openDays"><option>ทุกวัน</option><option>จ-ศ</option><option>นัดหมายล่วงหน้า</option></select></div>
+          <div><label>รองรับได้ (คน)</label><input id="f_capacity" inputmode="numeric"></div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset"><legend>รูปภาพ & วิดีโอ</legend>
+        <label>อัปโหลดรูปภาพ (ขึ้น Google Drive อัตโนมัติ)</label>
+        <input id="f_upload" type="file" accept="image/*" multiple onchange="uploadImages(this)">
+        <div class="hint" id="upStatus">เลือกรูปเพื่ออัปโหลด ระบบจะวางลิงก์ให้อัตโนมัติ (รูปแรกเป็นรูปหลัก)</div>
+        <label>ลิงก์รูปภาพ (คั่นแต่ละรูปด้วย | )</label>
+        <textarea id="f_images" placeholder="https://drive.google.com/uc?id=XXXX | https://..."></textarea>
+        <div class="hint">หรือวางลิงก์เองก็ได้: อัปโหลดรูปขึ้น Google Drive → แชร์แบบ "ทุกคนที่มีลิงก์" → วางที่นี่</div>
+        <label>ลิงก์วิดีโอ YouTube (แบบฝัง)</label>
+        <input id="f_video" placeholder="https://www.youtube.com/embed/XXXX">
+        <div class="hint">นำรหัสหลัง watch?v= มาต่อท้าย .../embed/ เช่น youtube.com/embed/abc123</div>
+      </fieldset>
+
+      <fieldset class="fieldset"><legend>เนื้อหา</legend>
+        <label>เรื่องราว/ที่มา (แต่ละย่อหน้าคั่นด้วย ||| )</label>
+        <textarea id="f_story" style="min-height:110px"></textarea>
+        <label>แท็ก (คั่นด้วย | )</label><input id="f_tags" placeholder="ศพก.|BCG Model|GAP">
+        <label>ผลผลิต/สินค้า (คั่นด้วย | )</label><input id="f_products" placeholder="มะนาว|ทุเรียน|ข้าวฮาง">
+        <label>ฐานเรียนรู้ (JSON — ขั้นสูง)</label>
+        <textarea id="f_bases" placeholder='[{"ico":"🌿","t":"ชื่อฐาน","d":"คำอธิบาย"}]'></textarea>
+      </fieldset>
+
+      <fieldset class="fieldset"><legend>สิ่งอำนวยความสะดวก</legend>
+        <div class="toggles">
+          <label class="tog"><input type="checkbox" id="f_parking"> 🅿️ ที่จอดรถ</label>
+          <label class="tog"><input type="checkbox" id="f_toilet"> 🚻 ห้องน้ำ</label>
+          <label class="tog"><input type="checkbox" id="f_food"> 🍽️ อาหาร</label>
+          <label class="tog"><input type="checkbox" id="f_stay"> 🛏️ ที่พัก</label>
+          <label class="tog"><input type="checkbox" id="f_meeting"> 🏛️ ห้องประชุม</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset"><legend>สถิติ & ข้อมูลภายใน</legend>
+        <div class="grid3">
+          <div><label>ผู้เข้าชม/ปี</label><input id="f_visitors" inputmode="numeric"></div>
+          <div><label>ผู้อบรม/ปี</label><input id="f_trained" inputmode="numeric"></div>
+          <div><label>รายได้รวม/ปี (บ.)</label><input id="f_income" inputmode="numeric"></div>
+        </div>
+        <div class="grid2">
+          <div><label>งบประมาณที่ได้รับ (บ.)</label><input id="f_budget" inputmode="numeric"></div>
+          <div><label>ความต้องการสนับสนุน</label><input id="f_support"></div>
+        </div>
+        <div class="hint">งบประมาณและความต้องการสนับสนุน แสดงเฉพาะมุมมองผู้บริหาร</div>
+      </fieldset>
+
+      <button class="btn btn-block" id="saveBtn" onclick="save()">💾 บันทึกข้อมูล</button>
+      <div class="msg" id="saveMsg"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ===== CONFIG: วางลิงก์ Web app จาก Apps Script ===== */
+const CONFIG = { GAS_URL: '' };
+
+let CENTERS = [], current = null, pin = '';
+
+function jsonp(url, params, cb){
+  const name='cb_'+Math.random().toString(36).slice(2); params.callback=name;
+  const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
+  window[name]=d=>{cb(d);delete window[name];s.remove();};
+  const s=document.createElement('script'); s.src=url+'?'+qs;
+  s.onerror=()=>{cb(null);delete window[name];s.remove();};
+  document.body.appendChild(s);
+}
+
+function loadCenters(){
+  if(!CONFIG.GAS_URL){ document.getElementById('demoNote').style.display='block';
+    document.getElementById('loginCenter').innerHTML='<option value="0">(สาธิต) ศูนย์ตัวอย่าง</option>'; return; }
+  jsonp(CONFIG.GAS_URL,{action:'getAll'},r=>{
+    if(r&&r.ok){ CENTERS=r.centers;
+      document.getElementById('loginCenter').innerHTML=CENTERS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    }
+  });
+}
+
+function login(){
+  const id=+document.getElementById('loginCenter').value, p=document.getElementById('loginPin').value.trim();
+  const msg=document.getElementById('loginMsg'); msg.className='msg';
+  if(!p){ msg.className='msg bad'; msg.textContent='กรุณากรอกรหัส PIN'; return; }
+  if(!CONFIG.GAS_URL){ msg.className='msg bad'; msg.textContent='ยังไม่ได้เชื่อมต่อระบบหลังบ้าน'; return; }
+  const btn=document.getElementById('loginBtn'); btn.disabled=true; btn.textContent='กำลังตรวจสอบ...';
+  jsonp(CONFIG.GAS_URL,{action:'login',id:id,pin:p},r=>{
+    btn.disabled=false; btn.textContent='เข้าสู่ระบบ';
+    if(r&&r.valid){ pin=p; openEditor(id); }
+    else { msg.className='msg bad'; msg.textContent='รหัส PIN ไม่ถูกต้อง'; }
+  });
+}
+
+function openEditor(id){
+  jsonp(CONFIG.GAS_URL,{action:'getCenter',id:id},r=>{
+    if(!r||!r.center) return;
+    current=r.center;
+    document.getElementById('loginCard').style.display='none';
+    document.getElementById('editor').style.display='block';
+    document.getElementById('whoName').textContent='กำลังแก้ไข: '+current.name+' (อ.'+current.district+')';
+    fill(current);
+    window.scrollTo(0,0);
+  });
+}
+function v(id){return document.getElementById(id).value;}
+function fill(c){
+  const set=(id,val)=>document.getElementById(id).value=val??'';
+  set('f_name',c.name);document.getElementById('f_type').value=c.type;set('f_tambon',c.tambon);set('f_emoji',c.emoji);
+  set('f_contact',c.contact);set('f_phone',c.phone);set('f_highlight',c.highlight);
+  set('f_lat',c.lat);set('f_lng',c.lng);set('f_hours',c.hours);document.getElementById('f_openDays').value=c.openDays||'ทุกวัน';set('f_capacity',c.capacity);
+  set('f_images',(c.images||[]).join(' | '));set('f_video',c.video);
+  set('f_story',(c.story||[]).join('|||'));set('f_tags',(c.tags||[]).join('|'));set('f_products',(c.products||[]).join('|'));
+  set('f_bases',JSON.stringify(c.bases||[]));
+  ['parking','toilet','food','stay','meeting'].forEach(k=>document.getElementById('f_'+k).checked=!!(c.amenities&&c.amenities[k]));
+  set('f_visitors',c.visitors);set('f_trained',c.trained);set('f_income',c.income);set('f_budget',c.budget);set('f_support',c.support);
+}
+function save(){
+  const data={
+    name:v('f_name'),type:v('f_type'),tambon:v('f_tambon'),emoji:v('f_emoji'),
+    contact:v('f_contact'),phone:v('f_phone'),highlight:v('f_highlight'),
+    lat:v('f_lat'),lng:v('f_lng'),hours:v('f_hours'),openDays:v('f_openDays'),capacity:v('f_capacity'),
+    images:v('f_images').split('|').map(s=>s.trim()).filter(Boolean).join('|'),
+    video:v('f_video'),
+    story:v('f_story'),tags:v('f_tags'),products:v('f_products'),bases:v('f_bases'),
+    parking:document.getElementById('f_parking').checked,toilet:document.getElementById('f_toilet').checked,
+    food:document.getElementById('f_food').checked,stay:document.getElementById('f_stay').checked,meeting:document.getElementById('f_meeting').checked,
+    visitors:v('f_visitors'),trained:v('f_trained'),income:v('f_income'),budget:v('f_budget'),support:v('f_support')
+  };
+  const msg=document.getElementById('saveMsg'),btn=document.getElementById('saveBtn');
+  btn.disabled=true; btn.textContent='กำลังบันทึก...';
+  jsonp(CONFIG.GAS_URL,{action:'saveCenter',id:current.id,pin:pin,data:JSON.stringify(data)},r=>{
+    btn.disabled=false; btn.textContent='💾 บันทึกข้อมูล';
+    if(r&&r.ok){ msg.className='msg ok'; msg.textContent='✓ '+(r.msg||'บันทึกเรียบร้อย'); }
+    else { msg.className='msg bad'; msg.textContent='✗ '+((r&&r.error)||'บันทึกไม่สำเร็จ'); }
+    window.scrollTo(0,document.body.scrollHeight);
+  });
+}
+function logout(){ location.reload(); }
+
+/* ---- image upload to Drive via POST ---- */
+function fileToB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
+async function uploadImages(input){
+  const files=[...input.files]; if(!files.length) return;
+  const st=document.getElementById('upStatus');
+  if(!CONFIG.GAS_URL){ st.textContent='⚠️ ยังไม่ได้เชื่อมระบบหลังบ้าน — กรุณาวางลิงก์เองในช่องด้านล่าง'; return; }
+  const box=document.getElementById('f_images');
+  let done=0;
+  for(const f of files){
+    st.textContent=`กำลังอัปโหลด ${done+1}/${files.length} ...`;
+    try{
+      const b64=await fileToB64(f);
+      const res=await fetch(CONFIG.GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({action:'uploadImage',id:current.id,pin:pin,name:f.name,mime:f.type,data:b64})});
+      const j=await res.json();
+      if(j&&j.ok&&j.url){ box.value=(box.value.trim()?box.value.trim()+' | ':'')+j.url; done++; }
+      else { st.textContent='✗ อัปโหลดไม่สำเร็จ: '+((j&&j.error)||'')+' — ลองวางลิงก์เอง'; return; }
+    }catch(err){ st.textContent='✗ อัปโหลดไม่ได้ (เครือข่าย/สิทธิ์) — กรุณาวางลิงก์เองในช่องด้านล่าง'; return; }
+  }
+  st.textContent=`✓ อัปโหลดสำเร็จ ${done} รูป — อย่าลืมกดบันทึก`;
+  input.value='';
+}
+
+loadCenters();
+</script>
+</body>
+</html>

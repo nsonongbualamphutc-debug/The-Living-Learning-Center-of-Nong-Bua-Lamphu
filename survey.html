@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ประเมินความพึงพอใจ | ศูนย์เรียนรู้หนองบัวลำภู</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest-900:#14331f;--forest-800:#1c4a2c;--forest-700:#266038;--leaf:#4a8c3f;--leaf-soft:#e8f0df;
+  --gold:#c8962b;--gold-bright:#e2a82c;--gold-soft:#f5ebd4;--cream:#f6f2e8;--paper:#fffdf7;
+  --ink:#23251c;--muted:#7a7a6a;--line:#e6e1d3;--teal:#159486;--r:18px;--r-sm:12px;
+  --sh:0 4px 18px rgba(20,40,20,.08);--sh-lg:0 16px 44px rgba(20,40,20,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun',sans-serif;background:var(--cream);color:var(--ink);line-height:1.65;
+  background-image:radial-gradient(circle at 50% -10%,rgba(74,140,63,.1),transparent 50%)}
+h1,h2,h3,.k{font-family:'Kanit',sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:20px 18px 50px}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);
+  padding:24px;animation:rise .5s ease}
+
+/* header */
+.head{text-align:center;color:#fff;background:linear-gradient(150deg,var(--forest-900),var(--forest-700));
+  border-radius:var(--r) var(--r) 0 0;padding:30px 24px 26px;margin:-24px -24px 24px}
+.head .badge{display:inline-block;background:rgba(226,168,44,.18);color:var(--gold-bright);font-family:'Kanit';
+  font-size:12.5px;font-weight:500;padding:5px 14px;border-radius:20px;border:1px solid rgba(226,168,44,.3);margin-bottom:12px}
+.head h1{font-size:22px;font-weight:600;line-height:1.25}
+.head .cname{font-size:15px;color:var(--gold-bright);font-family:'Kanit';margin-top:7px}
+.head p{font-size:13.5px;color:#cdddc6;margin-top:8px}
+
+.qlabel{font-family:'Kanit';font-size:15.5px;font-weight:500;color:var(--forest-900);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.section{margin-bottom:22px}
+.section>.sub{font-size:13px;color:var(--muted);margin-bottom:14px}
+
+/* role segmented */
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.role-opt{border:1.5px solid var(--line);border-radius:12px;padding:14px;text-align:center;cursor:pointer;
+  font-family:'Kanit';font-size:15px;font-weight:500;transition:.15s;background:#fff}
+.role-opt .ri{font-size:24px;display:block;margin-bottom:5px}
+.role-opt.sel{border-color:var(--leaf);background:var(--leaf-soft);color:var(--forest-800)}
+
+/* star question */
+.q{padding:15px 0;border-bottom:1px dashed var(--line)}
+.q:last-child{border-bottom:none}
+.stars{display:flex;gap:6px;margin-top:9px}
+.star{font-size:34px;cursor:pointer;color:#dcd6c5;transition:transform .1s,color .15s;line-height:1;user-select:none}
+.star:hover{transform:scale(1.15)}
+.star.on{color:var(--gold-bright)}
+.qhint{font-size:12.5px;color:var(--muted);margin-top:5px;min-height:16px;font-family:'Kanit'}
+
+textarea{width:100%;font-family:'Sarabun';font-size:14.5px;padding:12px 14px;border:1px solid var(--line);
+  border-radius:12px;background:#fff;resize:vertical;min-height:70px;margin-top:8px}
+textarea:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 3px rgba(74,140,63,.13)}
+
+.submit{width:100%;font-family:'Kanit';font-size:16.5px;font-weight:500;color:#fff;background:var(--forest-800);
+  border:none;border-radius:13px;padding:15px;cursor:pointer;margin-top:8px;transition:.18s}
+.submit:hover{background:var(--forest-900)}
+.submit:disabled{opacity:.55;cursor:not-allowed}
+.note{font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6}
+
+/* thank you */
+.thanks{text-align:center;padding:30px 10px}
+.thanks .big{font-size:60px;animation:rise .5s ease}
+.thanks h2{font-size:24px;color:var(--forest-900);margin:14px 0 6px}
+.thanks p{color:var(--muted);font-size:15px}
+.err{background:#fbe7e6;color:#b3261e;border-radius:10px;padding:10px 14px;font-size:13.5px;margin-bottom:14px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" id="card">
+    <div class="head">
+      <span class="badge">⭐ แบบประเมินความพึงพอใจ</span>
+      <h1>ร่วมให้คะแนนศูนย์เรียนรู้</h1>
+      <div class="cname" id="cname">กำลังโหลด...</div>
+      <p>สำหรับผู้เข้าชมและผู้เข้าอบรม ความเห็นของท่านช่วยพัฒนาศูนย์ให้ดียิ่งขึ้น</p>
+    </div>
+
+    <div class="err" id="err"></div>
+
+    <div class="section">
+      <div class="qlabel">👤 ท่านคือ</div>
+      <div class="roles">
+        <div class="role-opt" data-role="ผู้เข้าชม"><span class="ri">🚶</span>ผู้เข้าชม</div>
+        <div class="role-opt" data-role="ผู้เข้าอบรม"><span class="ri">🎓</span>ผู้เข้าอบรม</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="qlabel">📝 ให้คะแนนความพึงพอใจ</div>
+      <div class="sub">แตะดาวเพื่อให้คะแนน (1 = น้อยที่สุด, 5 = มากที่สุด)</div>
+      <div id="questions"></div>
+    </div>
+
+    <div class="section">
+      <div class="qlabel">💡 สิ่งที่ได้เรียนรู้ / ประทับใจ</div>
+      <textarea id="learned" placeholder="เล่าสิ่งที่ได้เรียนรู้หรือประทับใจ (ไม่บังคับ)"></textarea>
+    </div>
+    <div class="section">
+      <div class="qlabel">🔧 สิ่งที่ควรปรับปรุง</div>
+      <textarea id="improve" placeholder="ข้อเสนอแนะเพื่อพัฒนาศูนย์ (ไม่บังคับ)"></textarea>
+    </div>
+
+    <button class="submit" id="submitBtn" onclick="submitSurvey()">ส่งแบบประเมิน</button>
+    <div class="note">ข้อมูลนี้ใช้เพื่อพัฒนาศูนย์เรียนรู้ • สำนักงานสถิติจังหวัดหนองบัวลำภู</div>
+  </div>
+</div>
+
+<script>
+/* ===== CONFIG: วางลิงก์ Web app จาก Apps Script ที่นี่ ===== */
+const CONFIG = { GAS_URL: '' };  // เช่น 'https://script.google.com/macros/s/XXXX/exec'
+
+/* ชุดคำถาม — ปรับ/เพิ่ม/ลดได้ (key ต้องตรงกับ Code.gs ASPECTS) */
+const QUESTIONS = [
+  {key:'q_content', ico:'📚', label:'เนื้อหา / สิ่งที่ได้เรียนรู้'},
+  {key:'q_speaker', ico:'🎤', label:'วิทยากร / ผู้ถ่ายทอดความรู้'},
+  {key:'q_place',   ico:'🏡', label:'สถานที่และสิ่งอำนวยความสะดวก'},
+  {key:'q_apply',   ico:'🌱', label:'การนำความรู้ไปใช้ประโยชน์'},
+  {key:'q_overall', ico:'⭐', label:'ความพึงพอใจโดยรวม'}
+];
+const LEVEL = ['','น้อยที่สุด','น้อย','ปานกลาง','มาก','มากที่สุด'];
+
+const centerId = parseInt(new URLSearchParams(location.search).get('id'), 10);
+const state = { role:'', ratings:{} };
+
+/* ถ้าไม่มี id (เข้ามาจากลิงก์รวม) ให้เลือกศูนย์ก่อน */
+if(isNaN(centerId)){ showPicker(); }
+
+function showPicker(){
+  document.getElementById('card').innerHTML=`<div class="head">
+    <span class="badge">⭐ แบบประเมินความพึงพอใจ</span>
+    <h1>เลือกศูนย์ที่ต้องการประเมิน</h1>
+    <p>โปรดเลือกศูนย์เรียนรู้ที่ท่านเข้าชมหรือเข้าอบรม</p></div>
+    <label class="qlabel" style="margin-bottom:8px">🏫 ศูนย์เรียนรู้</label>
+    <select id="pick" style="width:100%;font-family:Sarabun;font-size:15px;padding:13px;border:1px solid var(--line);border-radius:12px"></select>
+    <button class="submit" style="margin-top:18px" onclick="goPick()">ถัดไป →</button>`;
+  const sel=document.getElementById('pick');
+  if(!CONFIG.GAS_URL){ sel.innerHTML='<option value="0">(สาธิต) เลือกได้เมื่อเชื่อมระบบ</option>'; return; }
+  jsonp(CONFIG.GAS_URL,{action:'getAll'},r=>{
+    if(r&&r.ok) sel.innerHTML=r.centers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  });
+}
+function goPick(){ location.search='?id='+document.getElementById('pick').value; }
+
+/* build star questions */
+document.getElementById('questions').innerHTML = QUESTIONS.map(q=>`
+  <div class="q">
+    <div class="qlabel" style="font-size:14.5px">${q.ico} ${q.label}</div>
+    <div class="stars" data-key="${q.key}">${[1,2,3,4,5].map(n=>`<span class="star" data-n="${n}">★</span>`).join('')}</div>
+    <div class="qhint" id="hint_${q.key}"></div>
+  </div>`).join('');
+
+document.querySelectorAll('.role-opt').forEach(el=>el.onclick=()=>{
+  document.querySelectorAll('.role-opt').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel'); state.role = el.dataset.role;
+});
+document.querySelectorAll('.stars').forEach(row=>{
+  const key = row.dataset.key;
+  row.querySelectorAll('.star').forEach(st=>st.onclick=()=>{
+    const n = +st.dataset.n; state.ratings[key] = n;
+    row.querySelectorAll('.star').forEach(s=>s.classList.toggle('on', +s.dataset.n <= n));
+    document.getElementById('hint_'+key).textContent = LEVEL[n];
+  });
+});
+
+/* load center name */
+function loadName(){
+  if(!CONFIG.GAS_URL){ document.getElementById('cname').textContent='(เชื่อมต่อระบบเพื่อแสดงชื่อศูนย์)'; return; }
+  jsonp(CONFIG.GAS_URL,{action:'getCenter',id:centerId},r=>{
+    document.getElementById('cname').textContent = (r&&r.center)? r.center.name : 'ศูนย์เรียนรู้';
+  });
+}
+
+function showErr(m){ const e=document.getElementById('err'); e.textContent=m; e.style.display='block'; }
+
+function submitSurvey(){
+  if(!state.role){ showErr('กรุณาเลือกว่าท่านเป็นผู้เข้าชมหรือผู้เข้าอบรม'); return; }
+  if(!state.ratings.q_overall){ showErr('กรุณาให้คะแนนความพึงพอใจโดยรวมอย่างน้อย 1 ข้อ'); return; }
+  const payload = Object.assign({
+    centerId: centerId, role: state.role,
+    learned: document.getElementById('learned').value.trim(),
+    improve: document.getElementById('improve').value.trim()
+  }, state.ratings);
+
+  const btn=document.getElementById('submitBtn'); btn.disabled=true; btn.textContent='กำลังส่ง...';
+  if(!CONFIG.GAS_URL){ thanks(); return; }   // โหมดสาธิต (ยังไม่เชื่อมระบบ)
+  jsonp(CONFIG.GAS_URL,{action:'submitSurvey',data:JSON.stringify(payload)},r=>{
+    if(r&&r.ok) thanks();
+    else { showErr('ส่งไม่สำเร็จ กรุณาลองใหม่'); btn.disabled=false; btn.textContent='ส่งแบบประเมิน'; }
+  });
+}
+
+function thanks(){
+  try{ localStorage.setItem('nbl_survey_'+centerId, Date.now()); }catch(e){}
+  document.getElementById('card').innerHTML=`<div class="thanks">
+    <div class="big">🙏</div><h2>ขอบคุณสำหรับการประเมิน</h2>
+    <p>ความคิดเห็นของท่านจะช่วยพัฒนาศูนย์เรียนรู้ให้ดียิ่งขึ้น</p></div>`;
+}
+
+/* กันการประเมินซ้ำในเครื่องเดิม */
+function checkDuplicate(){
+  if(isNaN(centerId)) return;
+  let done=false; try{ done=!!localStorage.getItem('nbl_survey_'+centerId); }catch(e){}
+  if(done){
+    document.getElementById('card').innerHTML=`<div class="thanks">
+      <div class="big">✅</div><h2>ท่านได้ประเมินศูนย์นี้แล้ว</h2>
+      <p>ขอบคุณสำหรับการมีส่วนร่วม</p>
+      <button class="submit" style="max-width:260px;margin:18px auto 0" onclick="reEvaluate()">ประเมินอีกครั้ง</button></div>`;
+  }
+}
+function reEvaluate(){ try{localStorage.removeItem('nbl_survey_'+centerId);}catch(e){} location.reload(); }
+
+/* JSONP helper */
+function jsonp(url, params, cb){
+  const name='cb_'+Math.random().toString(36).slice(2);
+  params.callback=name;
+  const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
+  window[name]=d=>{ cb(d); delete window[name]; s.remove(); };
+  const s=document.createElement('script'); s.src=url+'?'+qs;
+  s.onerror=()=>{ cb(null); delete window[name]; s.remove(); };
+  document.body.appendChild(s);
+}
+
+loadName();
+checkDuplicate();
+</script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+/************************************************************
+ * ศูนย์เรียนรู้ จังหวัดหนองบัวลำภู — Backend (Google Apps Script)
+ * วิธีใช้:
+ *  1) สร้าง Google Sheet เปล่า 1 ไฟล์
+ *  2) Extensions > Apps Script  วางโค้ดนี้ทั้งหมด
+ *  3) รันฟังก์ชัน setup() หนึ่งครั้ง (สร้างชีต + หัวคอลัมน์ + ข้อมูลตัวอย่าง)
+ *  4) Deploy > New deployment > Web app
+ *       - Execute as: Me
+ *       - Who has access: Anyone
+ *  5) คัดลอก Web app URL ไปวางในไฟล์ HTML (CONFIG.GAS_URL)
+ ************************************************************/
+
+const SHEETS = { centers: 'Centers', survey: 'Survey', log: 'Log' };
+
+const CENTER_HEADERS = ['id','name','type','district','tambon','lat','lng','emoji','contact','phone',
+  'pin','established','area','members','highlight','tags','products','bases','story','facebook','hours',
+  'openDays','parking','toilet','food','stay','meeting','capacity','images','video',
+  'visitors','trained','income','budget','support','updated'];
+
+const SURVEY_HEADERS = ['timestamp','centerId','role','q_content','q_speaker','q_place','q_apply','q_overall','learned','improve'];
+
+const LOG_HEADERS = ['timestamp','centerId','name','action','detail'];
+
+const ASPECTS = ['q_content','q_speaker','q_place','q_apply','q_overall'];
+
+/* ---------- Web app entry (JSONP) ---------- */
+function doGet(e){
+  var out;
+  try { out = route(e.parameter); }
+  catch(err){ out = { ok:false, error:String(err) }; }
+  var json = JSON.stringify(out);
+  var cb = e.parameter.callback;
+  if (cb) return ContentService.createTextOutput(cb + '(' + json + ')')
+            .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
+}
+
+function route(p){
+  switch (p.action) {
+    case 'getAll':       return { ok:true, centers: readCenters(true) };
+    case 'getCenter':    return { ok:true, center: readCenters(false)[Number(p.id)] || null };
+    case 'login':        return { ok:true, valid: checkPin(Number(p.id), String(p.pin)) };
+    case 'saveCenter':   return saveCenter(Number(p.id), String(p.pin), JSON.parse(p.data));
+    case 'submitSurvey': return submitSurvey(JSON.parse(p.data));
+    case 'surveyStats':  return { ok:true, stats: surveyStats(Number(p.id)) };
+    case 'recentLog':    return { ok:true, log: recentLog() };
+    default:             return { ok:true, msg:'ศูนย์เรียนรู้ หนองบัวลำภู API พร้อมใช้งาน' };
+  }
+}
+
+/* ---------- POST: image upload to Drive ---------- */
+function doPost(e){
+  var out;
+  try {
+    var d = JSON.parse(e.postData.contents);
+    if (d.action === 'uploadImage') out = uploadImage(d);
+    else out = { ok:false, error:'unknown action' };
+  } catch(err){ out = { ok:false, error:String(err) }; }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+}
+function uploadImage(d){
+  if (!checkPin(Number(d.id), String(d.pin))) return { ok:false, error:'PIN ไม่ถูกต้อง' };
+  var fname = 'ศูนย์เรียนรู้-รูปภาพ';
+  var it = DriveApp.getFoldersByName(fname);
+  var folder = it.hasNext() ? it.next() : DriveApp.createFolder(fname);
+  var bytes = Utilities.base64Decode(d.data);
+  var blob = Utilities.newBlob(bytes, d.mime || 'image/jpeg', d.name || ('img_'+Date.now()+'.jpg'));
+  var file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return { ok:true, url:'https://drive.google.com/uc?id=' + file.getId() };
+}
+
+/* ---------- Sheet helpers ---------- */
+function getSheet(name, headers){
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(name);
+  if (!sh){ sh = ss.insertSheet(name); sh.appendRow(headers); sh.setFrozenRows(1); }
+  if (sh.getLastRow() === 0) sh.appendRow(headers);
+  return sh;
+}
+function sheetObjects(sh){
+  var v = sh.getDataRange().getValues(); if (v.length < 2) return [];
+  var h = v[0], out = [];
+  for (var i=1;i<v.length;i++){ var o={}; for (var j=0;j<h.length;j++) o[h[j]] = v[i][j]; out.push(o); }
+  return out;
+}
+
+/* ---------- Read centers (+ satisfaction from Survey) ---------- */
+function readCenters(includeStats){
+  var rows = sheetObjects(getSheet(SHEETS.centers, CENTER_HEADERS));
+  var surveys = includeStats ? sheetObjects(getSheet(SHEETS.survey, SURVEY_HEADERS)) : [];
+  return rows.map(function(r){
+    var c = {
+      id:Number(r.id), name:r.name, type:r.type, district:r.district, tambon:r.tambon,
+      lat:Number(r.lat), lng:Number(r.lng), emoji:r.emoji||'🌾',
+      contact:r.contact, phone:String(r.phone),
+      established:r.established, area:r.area, members:r.members,
+      highlight:r.highlight,
+      tags: splitList(r.tags), products: splitList(r.products),
+      bases: parseJSON(r.bases, []),
+      story: String(r.story||'').split('|||').filter(String),
+      facebook:r.facebook, hours:r.hours, openDays:r.openDays,
+      amenities:{ parking:bool(r.parking), toilet:bool(r.toilet), food:bool(r.food), stay:bool(r.stay), meeting:bool(r.meeting) },
+      capacity:Number(r.capacity)||0,
+      images: splitList(r.images), video:r.video||'',
+      visitors:Number(r.visitors)||0, trained:Number(r.trained)||0,
+      income:Number(r.income)||0, budget:Number(r.budget)||0,
+      support:r.support||'', updated:r.updated||''
+    };
+    if (includeStats){
+      var st = aggregate(surveys.filter(function(s){ return Number(s.centerId) === c.id; }));
+      c.satisfaction = st.overall;        // ดาว = ค่าเฉลี่ยจากผู้ประเมินเท่านั้น
+      c.surveyCount  = st.count;
+      c.aspects      = st.aspects;
+    }
+    return c;
+  });
+}
+
+/* ---------- PIN ---------- */
+function checkPin(id, pin){
+  var rows = sheetObjects(getSheet(SHEETS.centers, CENTER_HEADERS));
+  var r = rows.filter(function(x){ return Number(x.id) === id; })[0];
+  return !!r && String(r.pin) === String(pin);
+}
+
+/* ---------- Save center (PIN-gated) ---------- */
+function saveCenter(id, pin, data){
+  if (!checkPin(id, pin)) return { ok:false, error:'PIN ไม่ถูกต้อง' };
+  var sh = getSheet(SHEETS.centers, CENTER_HEADERS);
+  var v = sh.getDataRange().getValues(), h = v[0];
+  var idCol = h.indexOf('id');
+  for (var i=1;i<v.length;i++){
+    if (Number(v[i][idCol]) === id){
+      // อัปเดตเฉพาะฟิลด์ที่ศูนย์แก้ได้ (ไม่แตะ pin / id / ความพึงพอใจ)
+      var editable = ['name','type','district','tambon','lat','lng','emoji','contact','phone',
+        'established','area','members','highlight','tags','products','bases','story','facebook','hours',
+        'openDays','parking','toilet','food','stay','meeting','capacity','images','video',
+        'visitors','trained','income','budget','support'];
+      editable.forEach(function(k){
+        if (data[k] !== undefined){ var col = h.indexOf(k); if (col>-1) v[i][col] = data[k]; }
+      });
+      v[i][h.indexOf('updated')] = thaiDate();
+      sh.getRange(i+1,1,1,h.length).setValues([v[i]]);
+      appendLog(id, data.name||'', 'แก้ไขข้อมูลศูนย์');
+      return { ok:true, msg:'บันทึกข้อมูลศูนย์เรียบร้อย' };
+    }
+  }
+  return { ok:false, error:'ไม่พบรหัสศูนย์' };
+}
+
+/* ---------- Survey submit (no auth — visitors/trainees) ---------- */
+function submitSurvey(d){
+  var sh = getSheet(SHEETS.survey, SURVEY_HEADERS);
+  sh.appendRow([ new Date(), Number(d.centerId), d.role||'',
+    num(d.q_content), num(d.q_speaker), num(d.q_place), num(d.q_apply), num(d.q_overall),
+    d.learned||'', d.improve||'' ]);
+  return { ok:true, msg:'ขอบคุณสำหรับการประเมิน' };
+}
+
+/* ---------- Stats ---------- */
+function surveyStats(id){
+  var rows = sheetObjects(getSheet(SHEETS.survey, SURVEY_HEADERS))
+              .filter(function(s){ return Number(s.centerId) === id; });
+  var agg = aggregate(rows);
+  agg.learned = rows.map(function(r){return r.learned;}).filter(String);
+  agg.improve = rows.map(function(r){return r.improve;}).filter(String);
+  agg.byRole = {
+    'ผู้เข้าชม': rows.filter(function(r){return r.role==='ผู้เข้าชม';}).length,
+    'ผู้เข้าอบรม': rows.filter(function(r){return r.role==='ผู้เข้าอบรม';}).length
+  };
+  return agg;
+}
+function aggregate(rows){
+  var n = rows.length, aspects = {};
+  ASPECTS.forEach(function(a){
+    var vals = rows.map(function(r){ return Number(r[a]); }).filter(function(x){ return x>0; });
+    aspects[a] = vals.length ? round1(vals.reduce(function(s,x){return s+x;},0)/vals.length) : 0;
+  });
+  return { count:n, overall:aspects.q_overall, aspects:aspects };
+}
+
+/* ---------- Edit log ---------- */
+function appendLog(centerId, name, action, detail){
+  getSheet(SHEETS.log, LOG_HEADERS).appendRow([ new Date(), centerId, name, action, detail||'' ]);
+}
+function recentLog(){
+  var rows = sheetObjects(getSheet(SHEETS.log, LOG_HEADERS));
+  return rows.slice(-12).reverse().map(function(r){
+    var t = r.timestamp instanceof Date ? Utilities.formatDate(r.timestamp,'Asia/Bangkok','dd/MM/yyyy HH:mm') : String(r.timestamp);
+    return { time:t, name:r.name, action:r.action };
+  });
+}
+
+/* ---------- Utils ---------- */
+function splitList(s){ return String(s||'').split('|').map(function(x){return x.trim();}).filter(String); }
+function parseJSON(s,f){ try{ return JSON.parse(s); }catch(e){ return f; } }
+function bool(v){ return v===true || String(v).toUpperCase()==='TRUE' || v==='✓' || v===1; }
+function num(v){ var n=Number(v); return n>0?n:''; }
+function round1(x){ return Math.round(x*10)/10; }
+function thaiDate(){ return Utilities.formatDate(new Date(),'Asia/Bangkok','dd/MM/yyyy HH:mm'); }
+
+/* ---------- One-time setup with sample data ---------- */
+function setup(){
+  getSheet(SHEETS.centers, CENTER_HEADERS);
+  getSheet(SHEETS.survey, SURVEY_HEADERS);
+  getSheet(SHEETS.log, LOG_HEADERS);
+  var sh = getSheet(SHEETS.centers, CENTER_HEADERS);
+  if (sh.getLastRow() > 1) return; // มีข้อมูลแล้ว ไม่เขียนทับ
+  var S = [
+    [0,'กลุ่มปลูกผักอินทรีย์บ้านโพธิ์ศรีสำราญ','เกษตรอินทรีย์','เมืองหนองบัวลำภู','หัวนา',17.205,102.442,'🥬','นางประดับ สมณะ','081-0568544','3901','พ.ศ. 2554','8 ไร่','38 ราย','โครงการพระราชดำริ ปลูกผักอินทรีย์ ใช้พลังงานแสงอาทิตย์','ผักอินทรีย์|โซลาร์เซลล์|ลดสารเคมี','ผักสวนครัวอินทรีย์|พืชผักปลอดสารพิษ','[]','','','','ทุกวัน',true,true,false,false,false,50,'','',280,240,120000,0,'โรงเรือนผลิตผลทางการเกษตร',''],
+    [1,'ศูนย์เรียนรู้ป่ารักษ์น้ำ','ปรัชญาเศรษฐกิจพอเพียง','นาวัง','นาเหล่า',17.452,102.302,'🌳','นางสาวพัชรินทร์ ศรีด้วง','065-3219730','3902','พ.ศ. 2541','5 ไร่','','โครงการพระราชดำริ อ่างเก็บน้ำซำปาคาด 6 ฐานเรียนรู้','6 ฐานเรียนรู้|ป่ารักษ์น้ำ|คนเอาถ่าน','ไม้ผล|ไม้ป่า|ถ่านชีวภาพ|สัตว์น้ำ','[]','','','','นัดหมายล่วงหน้า',true,true,true,false,true,100,'','',420,100,80000,200000,'',''],
+    [2,'ศูนย์ ศพก. อำเภอสุวรรณคูหา','เกษตรผสมผสาน','สุวรรณคูหา','ดงมะไฟ',17.553,102.183,'🌾','นายมนวัฒน์ บุณยพรหม','084-3370262','3903','','24 ไร่','','ศพก. BCG Model เกษตรผสมผสาน 24 ไร่ แปรรูปข้าวยาง','ศพก.|BCG Model|ข้าวยาง|GAP','มะนาว|ทุเรียน|เงาะ|กล้วยน้ำว้า|ข้าวฮาง','[]','','','08:30-16:30','จ-ศ',true,true,true,false,true,100,'','',650,300,180000,12500,'โรงเรือนอัจฉริยะ',''],
+    [3,'วิสาหกิจชุมชนแปลงใหญ่ข้าวอุทัยสวรรค์','วิสาหกิจชุมชน','นากลาง','อุทัยสวรรค์',17.322,102.312,'🍚','นางโสภา มุมวัน','086-2200224','3904','พ.ศ. 2565','615 ไร่','63 ราย','แปลงใหญ่ข้าว 615 ไร่ แบรนด์ข้าวบะออนซอน','แปลงใหญ่ข้าว|แบรนด์สินค้า|แปรรูปข้าว','ข้าว กข6|ข้าวดอกมะลิ 105|ข้าวฮาง','[]','','','','จ-ศ',true,true,false,false,true,80,'','',380,150,450000,0,'ชุดเครื่องยิงสี',''],
+    [4,'ค่ายคนดีศรีบุญเรือง','ปรัชญาเศรษฐกิจพอเพียง','ศรีบุญเรือง','เมืองใหม่',16.972,102.272,'🏕️','นางสาวศิริพร เนธิบุตร','063-9013027','3905','','15 ไร่ 3 งาน','','บำบัดฟื้นฟูผู้ติดยา ฝึกวิชาชีพ เกษตรในค่าย','ฝึกอาชีพ|บำบัดฟื้นฟู|เกษตรในค่าย','เห็ด|ไก่|เป็ด|ผักสวนครัว','[]','','','','นัดหมายล่วงหน้า',true,true,true,true,true,60,'','',200,90,40000,10000,'',''],
+    [5,'ศูนย์เรียนรู้โคกหนองโดนโมเดล','เกษตรผสมผสาน','โนนสัง','กุดดู่',17.002,102.572,'⛰️','นายเกรียงไกร ไทยอ่อน','081-9846526','3906','','1-3 ไร่','','โคก หนอง นา โมเดล จัดการน้ำ ปลูกพืช 5 ระดับ','โคกหนองนา|จัดการน้ำ|ปลูกป่า 3 อย่าง','ข้าว|ไก่กุดดู่หางขาว|ปลา|ป่า 3 อย่าง','[]','','','','นัดหมายล่วงหน้า',true,false,false,false,true,50,'','',340,120,95000,0,'พันธุ์ไก่พื้นบ้าน','']
+  ];
+  S.forEach(function(r){ r.push(thaiDate()); sh.appendRow(r); });
+}
