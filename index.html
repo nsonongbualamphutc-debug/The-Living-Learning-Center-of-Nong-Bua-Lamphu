@@ -521,7 +521,7 @@ const fmt=n=>n.toLocaleString('th-TH');
 const AMEN={parking:["🅿️","ที่จอดรถ"],toilet:["🚻","ห้องน้ำ"],food:["🍽️","อาหาร"],stay:["🛏️","ที่พัก"],meeting:["🏛️","ห้องประชุม"]};
 
 /* ===== CONFIG: วางลิงก์ Web app จาก Apps Script เพื่อใช้ข้อมูลสด ===== */
-const CONFIG={GAS_URL:'https://script.google.com/macros/s/AKfycbxBaLvvyeQYE2nuPPC8K5aA6cPL7s6Chab7WWhR1PoWu1X3s3uR-Wc0AUmeypjyLrtk/exec'};   // ว่าง = ใช้ข้อมูลตัวอย่างด้านบน
+const CONFIG={GAS_URL:''};   // ว่าง = ใช้ข้อมูลตัวอย่างด้านบน
 function jsonp(url,params,cb){
   const name='cb_'+Math.random().toString(36).slice(2); params.callback=name;
   const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
@@ -561,7 +561,14 @@ const MONTHS_FY=["ต.ค.","พ.ย.","ธ.ค.","ม.ค.","ก.พ.","มี.
 const MONTHS_FULL=["ตุลาคม","พฤศจิกายน","ธันวาคม","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน"];
 const FY_IDX=[9,10,11,0,1,2,3,4,5,6,7,8];     // ดัชนีเดือนปฏิทินตามลำดับปีงบ
 const toFY=arr=>FY_IDX.map(i=>arr[i]);
-let FY=2569, MFOCUS=-1;                        // MFOCUS = -1 ทุกเดือน, 0..11 = เดือนในลำดับปีงบ
+/* ค่าเริ่มต้น = ปีงบ + เดือนปัจจุบัน (ตามวันนี้) — เปลี่ยนเองได้ภายหลัง */
+function currentFiscal(){
+  const d=new Date(), m=d.getMonth(), be=d.getFullYear()+543;
+  // fmonth ลำดับปีงบ 0..11 (0=ต.ค.); fy = ปีงบประมาณ
+  return (m>=9) ? {fy:be+1, mf:m-9} : {fy:be, mf:m+3};
+}
+let _cf=currentFiscal();
+let FY=Math.min(Math.max(_cf.fy,2569),2575), MFOCUS=_cf.mf;   // ล็อกปีงบให้อยู่ในช่วง 2569–2575
 const yearOf=i=>(i<3?FY-1:FY);                 // ต.ค.–ธ.ค. = ปีก่อน, ม.ค.–ก.ย. = ปีงบ
 
 function buildFySel(){
