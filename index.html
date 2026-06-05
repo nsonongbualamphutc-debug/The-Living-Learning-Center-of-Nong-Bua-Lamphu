@@ -211,20 +211,39 @@ tr:hover td{background:var(--gold-soft)}
 .tool-btn.dark{background:var(--forest-800);color:#fff;border-color:var(--forest-800)}
 .tool-btn.dark:hover{background:var(--forest-900)}
 
-/* aspect analysis bars (drill) */
-.aspect-box{margin-top:18px;padding-top:18px;border-top:1px dashed var(--line)}
-.aspect-box h4{font-family:'Kanit';font-size:14.5px;font-weight:500;color:var(--forest-900);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.asp{display:grid;grid-template-columns:165px 1fr 46px;align-items:center;gap:12px;margin-bottom:10px}
-.asp .a-lab{font-size:13px;color:var(--ink)}
-.asp .a-track{height:11px;background:var(--cream);border-radius:8px;overflow:hidden}
-.asp .a-bar{height:100%;border-radius:8px;width:0;transition:width 1s cubic-bezier(.2,.7,.3,1)}
-.asp .a-val{font-family:'Kanit';font-weight:600;font-size:13.5px;color:var(--forest-900);text-align:right}
-.asp.low .a-lab{color:var(--coral);font-weight:600}
-.asp.low .a-lab::after{content:" ⚠ ควรพัฒนา";font-size:11px}
-.improve-list{margin-top:14px}
-.improve-list .il-title{font-family:'Kanit';font-size:13.5px;font-weight:500;color:var(--coral);margin-bottom:8px}
-.improve-list .il{font-size:13px;color:#5a5142;background:#fbf2ee;border-left:3px solid var(--coral);padding:7px 11px;border-radius:0 6px 6px 0;margin-bottom:6px}
+/* aspect analysis (drill) — full width, labels never wrap */
+.aspect-box{grid-column:1/-1;margin-top:20px;padding-top:18px;border-top:1px dashed var(--line)}
+.aspect-box>h4{font-family:'Kanit';font-size:14.5px;font-weight:500;color:var(--forest-900);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.aspect-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:start}
+.asp{margin-bottom:13px}
+.asp-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.asp-top .a-lab{font-size:13.5px;color:var(--ink);font-weight:500}
+.asp-top .a-warn{font-size:10.5px;color:#fff;background:var(--coral);font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;font-family:'Kanit'}
+.asp-top .a-val{margin-left:auto;font-family:'Kanit';font-weight:700;color:var(--forest-900);font-size:14.5px}
+.a-track{height:10px;background:var(--cream);border-radius:8px;overflow:hidden}
+.a-bar{height:100%;border-radius:8px;width:0;transition:width 1s cubic-bezier(.2,.7,.3,1)}
+.cmt-col{margin-bottom:14px}
+.cmt-col h5{font-family:'Kanit';font-size:13px;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.cmt-learn h5{color:var(--leaf)} .cmt-improve h5{color:var(--coral)}
+.cmt-box{max-height:178px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:5px}
+.cmt-box::-webkit-scrollbar{width:6px}.cmt-box::-webkit-scrollbar-thumb{background:#d8d2c2;border-radius:6px}
+.cmt{font-size:12.8px;color:#4a4d3c;padding:8px 11px;border-radius:8px;line-height:1.5}
+.cmt-learn .cmt{background:var(--leaf-soft);border-left:3px solid var(--leaf)}
+.cmt-improve .cmt{background:#fbf2ee;border-left:3px solid var(--coral)}
+.cmt-empty{font-size:12.5px;color:var(--muted);padding:4px 0}
 .asp-empty{font-size:13px;color:var(--muted);padding:6px 0}
+
+/* chart header with month-focus slicer */
+.chart-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.chart-head h4{margin:0}
+
+/* context bar (ปีงบประมาณ) — เห็นได้ทั้งสองมุมมอง */
+.ctxbar{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 auto 22px;
+  background:var(--paper);border:1px solid var(--line);border-radius:30px;padding:9px 20px;max-width:max-content;box-shadow:var(--sh-sm)}
+.ctxbar .ctx-lab{font-family:'Kanit';font-size:13px;font-weight:500;color:var(--forest-800)}
+.ctxbar select{font-family:'Kanit';font-size:13.5px;font-weight:600;color:var(--forest-900);border:1.5px solid var(--leaf);
+  border-radius:9px;padding:5px 12px;background:var(--leaf-soft);cursor:pointer}
+.ctxbar .ctx-note{font-size:12px;color:var(--muted)}
 
 /* recent activity */
 .activity{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh-sm);margin-bottom:18px}
@@ -234,9 +253,9 @@ tr:hover td{background:var(--gold-soft)}
 .act-row .act-time{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:12.5px}
 .act-row .act-name{color:var(--forest-900);font-weight:500}
 
-@media(max-width:560px){.asp{grid-template-columns:1fr;gap:4px}.asp .a-val{text-align:left}}
+@media(max-width:680px){.aspect-grid{grid-template-columns:1fr;gap:6px}}
 @media print{
-  .govbar,.hero,.toggle-wrap,#viewPublic,footer.site,.disclaimer,.exec-tools{display:none!important}
+  .govbar,.hero,.toggle-wrap,.ctxbar,#viewPublic,footer.site,.disclaimer,.exec-tools{display:none!important}
   body{background:#fff}
   .chart-box,.sat-box,.kpi-card,.drill,.table-box,.activity{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
   .sec-head h2{color:#000}
@@ -353,6 +372,15 @@ footer.site::before{content:"";position:absolute;inset:0;background-image:radial
   <div class="toggle">
     <button id="btnPublic" class="active" onclick="setView('public')"><i>👥</i> สำหรับประชาชน</button>
     <button id="btnExec" onclick="setView('exec')"><i>📊</i> สำหรับผู้บริหาร</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="ctxbar reveal">
+    <span class="ctx-lab">📅 ปีงบประมาณ</span>
+    <select id="fySel" onchange="fyChange(this.value)"></select>
+    <span class="ctx-lab">เดือน</span>
+    <select id="moSel" onchange="moChange(this.value)"></select>
   </div>
 </div>
 
@@ -493,7 +521,7 @@ const fmt=n=>n.toLocaleString('th-TH');
 const AMEN={parking:["🅿️","ที่จอดรถ"],toilet:["🚻","ห้องน้ำ"],food:["🍽️","อาหาร"],stay:["🛏️","ที่พัก"],meeting:["🏛️","ห้องประชุม"]};
 
 /* ===== CONFIG: วางลิงก์ Web app จาก Apps Script เพื่อใช้ข้อมูลสด ===== */
-const CONFIG={GAS_URL:'https://script.google.com/macros/s/AKfycbxBaLvvyeQYE2nuPPC8K5aA6cPL7s6Chab7WWhR1PoWu1X3s3uR-Wc0AUmeypjyLrtk/exec'};   // ว่าง = ใช้ข้อมูลตัวอย่างด้านบน
+const CONFIG={GAS_URL:''};   // ว่าง = ใช้ข้อมูลตัวอย่างด้านบน
 function jsonp(url,params,cb){
   const name='cb_'+Math.random().toString(36).slice(2); params.callback=name;
   const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
@@ -512,10 +540,54 @@ function loadLive(){
       loadActivity();
     }
   });
+  jsonp(CONFIG.GAS_URL,{action:'getMonthly'},r=>{
+    if(r&&r.ok&&r.monthly){ MONTHLY=r.monthly;
+      if(!document.getElementById('viewExec').classList.contains('hide'))renderDrill();
+    }
+  });
+}
+let MONTHLY=[];   // ข้อมูลรายเดือนจริงที่ศูนย์กรอก [{centerId,fy,fmonth,visitors,trained,income}]
+/* แปลงข้อมูลรายเดือนจริงของศูนย์ในปีงบ FY -> อาเรย์ลำดับปฏิทิน (ม.ค.-ธ.ค.) ; null ถ้ายังไม่มี */
+function realMonthly(centerId,field){
+  const arr=Array(12).fill(0); let has=false;
+  MONTHLY.forEach(r=>{ if(r.centerId===centerId && r.fy===FY){ arr[FY_IDX[r.fmonth-1]]=r[field]; has=true; } });
+  return has?arr:null;
 }
 
 /* monthly distribution: deterministic, sums to annual total, seasonal peak in cool/harvest season */
 const MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+/* ปีงบประมาณ: ต.ค.(ปีก่อน) – ก.ย. — เรียงเดือนแบบปีงบ */
+const MONTHS_FY=["ต.ค.","พ.ย.","ธ.ค.","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย."];
+const MONTHS_FULL=["ตุลาคม","พฤศจิกายน","ธันวาคม","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน"];
+const FY_IDX=[9,10,11,0,1,2,3,4,5,6,7,8];     // ดัชนีเดือนปฏิทินตามลำดับปีงบ
+const toFY=arr=>FY_IDX.map(i=>arr[i]);
+let FY=2569, MFOCUS=-1;                        // MFOCUS = -1 ทุกเดือน, 0..11 = เดือนในลำดับปีงบ
+const yearOf=i=>(i<3?FY-1:FY);                 // ต.ค.–ธ.ค. = ปีก่อน, ม.ค.–ก.ย. = ปีงบ
+
+function buildFySel(){
+  const sel=document.getElementById('fySel');
+  let o=''; for(let y=2569;y<=2575;y++) o+=`<option value="${y}" ${y===FY?'selected':''}>${y}</option>`;
+  sel.innerHTML=o; buildMoSel();
+}
+function buildMoSel(){
+  const sel=document.getElementById('moSel');
+  let o='<option value="-1">ทุกเดือน (ทั้งปีงบ)</option>';
+  for(let i=0;i<12;i++) o+=`<option value="${i}" ${MFOCUS===i?'selected':''}>${MONTHS_FULL[i]}</option>`;
+  sel.innerHTML=o;
+}
+function fyChange(v){ FY=+v; buildMoSel(); if(!document.getElementById('viewExec').classList.contains('hide')) renderDrill(); }
+function moChange(v){ MFOCUS=+v; if(!document.getElementById('viewExec').classList.contains('hide')) renderDrill(); }
+/* แปลงข้อมูลรายเดือนให้อยู่ลำดับปีงบ + โฟกัสเดือนเดียวถ้าเลือก */
+function fyChartData(mvRaw,mtRaw){
+  let mv=toFY(mvRaw), mt=toFY(mtRaw), labels=MONTHS_FY.slice();
+  if(MFOCUS>=0){ labels=[MONTHS_FY[MFOCUS]]; mv=[mv[MFOCUS]]; mt=[mt[MFOCUS]]; }
+  return {labels,mv,mt};
+}
+function chartTitle(){
+  return MFOCUS>=0
+    ? `ข้อมูลเดือน${MONTHS_FULL[MFOCUS]} ${yearOf(MFOCUS)} — ผู้เข้าชม & ผู้อบรม`
+    : `ความเคลื่อนไหวรายเดือน ปีงบ ${FY} — ผู้เข้าชม & ผู้อบรม`;
+}
 const BASE_W=[12,11,9,7,6,6,7,8,9,10,13,14];
 function distribute(total,offset){
   const w=BASE_W.map((_,i)=>BASE_W[(i+offset)%12]);
@@ -524,8 +596,10 @@ function distribute(total,offset){
   out[0]+=total-out.reduce((a,b)=>a+b,0);
   return out;
 }
-const monthlyVisitors=(c,i)=>distribute(c.visitors,i*2);
-const monthlyTrained=(c,i)=>distribute(c.trained,i*2+5);
+const monthlyVisitors=(c,i)=> realMonthly(c.id,'visitors') || distribute(c.visitors,i*2);
+const monthlyTrained=(c,i)=> realMonthly(c.id,'trained') || distribute(c.trained,i*2+5);
+/* คืนค่าของเดือนที่โฟกัส (ลำดับปีงบ MFOCUS) จากอาเรย์ลำดับปฏิทิน */
+const focusVal=arr=> MFOCUS>=0 ? arr[FY_IDX[MFOCUS]] : null;
 
 /* count-up animation for a lively, digital feel */
 function countUp(el,end,dec){
@@ -731,7 +805,14 @@ function renderDrill(){
   if(val==='all'){renderDrillOverview();return;}
   const idx=parseInt(val,10);
   const c=CENTERS[idx],col=TYPE_COLORS[c.type]||'#4a8c3f';
-  const mv=monthlyVisitors(c,idx),mt=monthlyTrained(c,idx);
+  const mvArr=monthlyVisitors(c,idx),mtArr=monthlyTrained(c,idx);
+  const incArr=realMonthly(c.id,'income');
+  const cd=fyChartData(mvArr,mtArr);
+  const focused=MFOCUS>=0;
+  const per=focused?(' ('+MONTHS_FULL[MFOCUS]+')'):'/ปี';
+  const vVal=focused?focusVal(mvArr):c.visitors;
+  const tVal=focused?focusVal(mtArr):c.trained;
+  const iVal=focused?(incArr?focusVal(incArr):null):c.income;
   drillDetail.innerHTML=`
     <div class="dd-left">
       <div class="dd-name">${c.name}</div>
@@ -739,21 +820,23 @@ function renderDrill(){
       <div class="dd-loc">📍 ต.${c.tambon} · อ.${c.district}</div>
       <div class="dd-quote">${c.highlight}</div>
       <div class="dd-kpis">
-        <div class="dd-kpi gold"><div class="k-lab">💰 รายได้รวม/ปี</div><div class="k-val">${fmt(c.income)}<small> บ.</small></div></div>
-        <div class="dd-kpi"><div class="k-lab">⭐ ความพึงพอใจ</div><div class="k-val">${c.satisfaction}<small>/5</small></div><div class="dd-stars">${stars(c.satisfaction)}</div></div>
-        <div class="dd-kpi"><div class="k-lab">👥 ผู้เข้าชม/ปี</div><div class="k-val">${fmt(c.visitors)}<small> คน</small></div></div>
-        <div class="dd-kpi"><div class="k-lab">🎓 ผู้อบรม/ปี</div><div class="k-val">${fmt(c.trained)}<small> คน</small></div></div>
+        <div class="dd-kpi gold"><div class="k-lab">💰 รายได้รวม${per}</div><div class="k-val">${iVal===null?'—':fmt(iVal)}<small> บ.</small></div></div>
+        <div class="dd-kpi" id="ddSat"><div class="k-lab">⭐ ความพึงพอใจ</div><div class="k-val">${(c.satisfaction||0)}<small>/5</small></div><div class="dd-stars">${stars(c.satisfaction||0)}</div></div>
+        <div class="dd-kpi"><div class="k-lab">👥 ผู้เข้าชม${per}</div><div class="k-val">${fmt(vVal||0)}<small> คน</small></div></div>
+        <div class="dd-kpi"><div class="k-lab">🎓 ผู้อบรม${per}</div><div class="k-val">${fmt(tVal||0)}<small> คน</small></div></div>
       </div>
     </div>
     <div class="dd-right">
-      <h4>ความเคลื่อนไหวรายเดือน — ผู้เข้าชม & ผู้อบรม</h4>
+      <div class="chart-head">
+        <h4>${chartTitle()}</h4>
+      </div>
       <canvas id="drillChart"></canvas>
     </div>`;
   if(drillChart)drillChart.destroy();
   drillChart=new Chart(document.getElementById('drillChart'),{type:'bar',
-    data:{labels:MONTHS,datasets:[
-      {label:'ผู้เข้าชม',data:mv,backgroundColor:col,borderRadius:5,maxBarThickness:18},
-      {label:'ผู้อบรม',data:mt,backgroundColor:'#c8962b',borderRadius:5,maxBarThickness:18}]},
+    data:{labels:cd.labels,datasets:[
+      {label:'ผู้เข้าชม',data:cd.mv,backgroundColor:col,borderRadius:5,maxBarThickness:MFOCUS>=0?60:18},
+      {label:'ผู้อบรม',data:cd.mt,backgroundColor:'#c8962b',borderRadius:5,maxBarThickness:MFOCUS>=0?60:18}]},
     options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{family:'Kanit'},padding:12,usePointStyle:true}}},
       scales:{y:{beginAtZero:true,grid:{color:'#efebdf'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
   renderAspects(c);
@@ -761,35 +844,45 @@ function renderDrill(){
 
 const ASPECT_LABELS={q_content:'เนื้อหา/สิ่งที่ได้เรียนรู้',q_speaker:'วิทยากร/ผู้ถ่ายทอด',q_place:'สถานที่/สิ่งอำนวยความสะดวก',q_apply:'การนำไปใช้ประโยชน์',q_overall:'ความพึงพอใจโดยรวม'};
 const clamp=v=>Math.max(1,Math.min(5,Math.round(v*10)/10));
+const esc=s=>String(s).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
 function deriveAspects(s){return {q_content:clamp(s+.1),q_speaker:clamp(s-.1),q_place:clamp(s-.2),q_apply:clamp(s+.05),q_overall:clamp(s)};}
-function aspectBars(aspects,count,improve){
+function aspectBars(aspects,count,learned,improve){
   const keys=Object.keys(ASPECT_LABELS);
   const vals=keys.map(k=>aspects[k]||0);
-  const minV=Math.min.apply(null,vals.filter(v=>v>0));
+  const pos=vals.filter(v=>v>0); const minV=pos.length?Math.min.apply(null,pos):0;
   const colorOf=v=>v>=4.5?'#3B6D11':v>=3.5?'#159486':v>=2.5?'#c8962b':v>=1.5?'#a4502a':'#b3261e';
-  let html=`<div class="aspect-box"><h4>⭐ ผลประเมินรายด้าน${count!==undefined?` (จาก ${count} รายการ)`:''}</h4>`;
-  if(count===0){html+='<div class="asp-empty">ยังไม่มีผลประเมินจากผู้เข้าชม/ผู้อบรม</div></div>';return html;}
-  keys.forEach((k,i)=>{const v=vals[i];const low=(v===minV&&v>0);
-    html+=`<div class="asp ${low?'low':''}"><span class="a-lab">${ASPECT_LABELS[k]}</span>
-      <div class="a-track"><div class="a-bar" data-w="${v/5*100}%" style="background:${colorOf(v)}"></div></div>
-      <span class="a-val">${v.toFixed(1)}</span></div>`;});
-  if(improve&&improve.length){
-    html+=`<div class="improve-list"><div class="il-title">🔧 สิ่งที่ผู้ประเมินอยากให้ปรับปรุง</div>`+
-      improve.slice(0,4).map(t=>`<div class="il">${t}</div>`).join('')+`</div>`;
+  if(count===0){
+    return `<div class="aspect-box"><h4>⭐ ผลประเมินรายด้าน</h4><div class="asp-empty">ยังไม่มีผลประเมินจากผู้เข้าชม/ผู้อบรม — เชิญชวนสแกน QR เพื่อให้คะแนน</div></div>`;
   }
-  html+='</div>';return html;
+  let bars='';
+  keys.forEach((k,i)=>{const v=vals[i];const low=(v===minV&&v>0);
+    bars+=`<div class="asp"><div class="asp-top"><span class="a-lab">${ASPECT_LABELS[k]}</span>${low?'<span class="a-warn">⚠ ควรพัฒนา</span>':''}<span class="a-val">${v.toFixed(1)}</span></div>
+      <div class="a-track"><div class="a-bar" data-w="${v/5*100}%" style="background:${colorOf(v)}"></div></div></div>`;});
+  const cmtList=(arr,empty)=> (arr&&arr.length)? arr.map(t=>`<div class="cmt">${esc(t)}</div>`).join('') : `<div class="cmt-empty">${empty}</div>`;
+  return `<div class="aspect-box"><h4>⭐ ผลประเมินรายด้าน${count!==undefined?` (จาก ${count} รายการ)`:''}</h4>
+    <div class="aspect-grid">
+      <div class="bars-col">${bars}</div>
+      <div class="cmt-cols">
+        <div class="cmt-col cmt-learn"><h5>💡 สิ่งที่ได้เรียนรู้ / ประทับใจ</h5><div class="cmt-box">${cmtList(learned,'ยังไม่มีความเห็น')}</div></div>
+        <div class="cmt-col cmt-improve"><h5>🔧 สิ่งที่ควรปรับปรุง</h5><div class="cmt-box">${cmtList(improve,'ยังไม่มีความเห็น')}</div></div>
+      </div>
+    </div></div>`;
 }
 function paintBars(){setTimeout(()=>document.querySelectorAll('.aspect-box .a-bar').forEach(b=>b.style.width=b.dataset.w),80);}
 function renderAspects(c){
-  const left=document.querySelector('#drillDetail .dd-left');
-  if(!left) return;
+  const box=document.getElementById('drillDetail'); if(!box) return;
   if(CONFIG.GAS_URL){
-    jsonp(CONFIG.GAS_URL,{action:'surveyStats',id:c.id},r=>{
+    const fmonth=MFOCUS>=0?(MFOCUS+1):0;
+    jsonp(CONFIG.GAS_URL,{action:'surveyStats',id:c.id,fy:FY,fmonth:fmonth},r=>{
       if(r&&r.ok){const s=r.stats;
-        left.insertAdjacentHTML('beforeend',aspectBars(s.aspects,s.count,s.improve));paintBars();}
+        box.insertAdjacentHTML('beforeend',aspectBars(s.aspects,s.count,s.learned,s.improve));paintBars();
+        const sat=document.getElementById('ddSat');   // อัปเดตดาวให้ตรงช่วงเวลาที่เลือก
+        if(sat){ sat.querySelector('.k-val').innerHTML=`${(s.overall||0).toFixed(1)}<small>/5</small>`;
+                 sat.querySelector('.dd-stars').textContent=stars(s.overall||0); }
+      }
     });
   }else{
-    left.insertAdjacentHTML('beforeend',aspectBars(deriveAspects(c.satisfaction||4)));paintBars();
+    box.insertAdjacentHTML('beforeend',aspectBars(deriveAspects(c.satisfaction||4),undefined,[],[]));paintBars();
   }
 }
 
@@ -817,14 +910,17 @@ function renderDrillOverview(){
       </div>
     </div>
     <div class="dd-right">
-      <h4>ความเคลื่อนไหวรายเดือนรวมทุกศูนย์ — ผู้เข้าชม &amp; ผู้อบรม</h4>
+      <div class="chart-head">
+        <h4>${chartTitle().replace('รายเดือน','รายเดือนรวมทุกศูนย์').replace('ข้อมูลเดือน','ข้อมูลรวมทุกศูนย์ เดือน')}</h4>
+      </div>
       <canvas id="drillChart"></canvas>
     </div>`;
   if(drillChart)drillChart.destroy();
+  const cd=fyChartData(mv,mt);
   drillChart=new Chart(document.getElementById('drillChart'),{type:'bar',
-    data:{labels:MONTHS,datasets:[
-      {label:'ผู้เข้าชม',data:mv,backgroundColor:'#266038',borderRadius:5,maxBarThickness:18},
-      {label:'ผู้อบรม',data:mt,backgroundColor:'#c8962b',borderRadius:5,maxBarThickness:18}]},
+    data:{labels:cd.labels,datasets:[
+      {label:'ผู้เข้าชม',data:cd.mv,backgroundColor:'#266038',borderRadius:5,maxBarThickness:MFOCUS>=0?60:18},
+      {label:'ผู้อบรม',data:cd.mt,backgroundColor:'#c8962b',borderRadius:5,maxBarThickness:MFOCUS>=0?60:18}]},
     options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{family:'Kanit'},padding:12,usePointStyle:true}}},
       scales:{y:{beginAtZero:true,grid:{color:'#efebdf'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
 }
@@ -859,7 +955,7 @@ function setView(v){
 
 const today=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
 govDate.textContent=today;
-initMap();buildFilters();buildLegend();buildHero();buildDrillSlicers();render();loadLive();
+initMap();buildFySel();buildFilters();buildLegend();buildHero();buildDrillSlicers();render();loadLive();
 </script>
 </body>
 </html>

@@ -79,6 +79,7 @@ textarea{resize:vertical;min-height:64px}
         <select id="adminPicker" style="margin-top:2px"></select>
       </div>
       <div class="readonly-note">⭐ <b>ความพึงพอใจ</b> ไม่ต้องกรอกที่นี่ — ระบบคำนวณจากแบบประเมินของผู้เข้าชม/ผู้อบรมโดยอัตโนมัติ</div>
+      <div class="readonly-note" style="background:#eef4ef;color:var(--forest-800)">📅 <b>วันที่บันทึก:</b> <span id="todayLabel"></span> <span style="opacity:.7">(ระบบบันทึกอัตโนมัติ แก้ไขไม่ได้)</span></div>
 
       <fieldset class="fieldset"><legend>ข้อมูลทั่วไป</legend>
         <label>ชื่อศูนย์</label><input id="f_name">
@@ -139,7 +140,17 @@ textarea{resize:vertical;min-height:64px}
         </div>
       </fieldset>
 
-      <fieldset class="fieldset"><legend>สถิติ & ข้อมูลภายใน</legend>
+      <fieldset class="fieldset"><legend>ข้อมูลรายเดือน (เดือนนี้)</legend>
+        <div class="readonly-note" style="background:#eef4ef;color:var(--forest-800);margin-top:0">บันทึกผลของ <b id="curMonthLabel"></b> — ระบบจะตีตราเดือน/ปีงบตามวันที่บันทึกให้อัตโนมัติ</div>
+        <div class="grid3">
+          <div><label>ผู้เข้าชมเดือนนี้</label><input id="f_m_visitors" inputmode="numeric" placeholder="เช่น 45"></div>
+          <div><label>ผู้อบรมเดือนนี้</label><input id="f_m_trained" inputmode="numeric" placeholder="เช่น 20"></div>
+          <div><label>รายได้เดือนนี้ (บ.)</label><input id="f_m_income" inputmode="numeric" placeholder="เช่น 15000"></div>
+        </div>
+        <div class="hint">ตัวเลขรายเดือนจะไปแสดงในกราฟแนวโน้มของแดชบอร์ด (เลือกดูได้ราย slicer เดือน) กรอกเฉพาะเดือนที่ต้องการบันทึก</div>
+      </fieldset>
+
+      <fieldset class="fieldset"><legend>ยอดสะสมทั้งปี & ข้อมูลภายใน (แสดงบนการ์ดสาธารณะ)</legend>
         <div class="grid3">
           <div><label>ผู้เข้าชม/ปี</label><input id="f_visitors" inputmode="numeric"></div>
           <div><label>ผู้อบรม/ปี</label><input id="f_trained" inputmode="numeric"></div>
@@ -161,7 +172,7 @@ textarea{resize:vertical;min-height:64px}
 
 <script>
 /* ===== CONFIG: วางลิงก์ Web app จาก Apps Script ===== */
-const CONFIG = { GAS_URL: 'https://script.google.com/macros/s/AKfycbxBaLvvyeQYE2nuPPC8K5aA6cPL7s6Chab7WWhR1PoWu1X3s3uR-Wc0AUmeypjyLrtk/exec' };
+const CONFIG = { GAS_URL: '' };
 
 let CENTERS = [], current = null, TOKEN = '', IS_ADMIN = false;
 
@@ -228,6 +239,12 @@ function loadCenter(id){
     if(!r||!r.center) return;
     current=r.center;
     document.getElementById('whoName').textContent=(IS_ADMIN?'👑 ผู้ดูแลระบบ — ':'กำลังแก้ไข: ')+current.name+' (อ.'+current.district+')';
+    const now=new Date();
+    const dStr=now.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+    const mStr=now.toLocaleDateString('th-TH',{month:'long',year:'numeric'});
+    const td=document.getElementById('todayLabel'); if(td) td.textContent=dStr;
+    const cm=document.getElementById('curMonthLabel'); if(cm) cm.textContent=mStr;
+    ['f_m_visitors','f_m_trained','f_m_income'].forEach(k=>{const el=document.getElementById(k); if(el) el.value='';});
     fill(current);
   });
 }
@@ -253,7 +270,8 @@ function save(){
     story:v('f_story'),tags:v('f_tags'),products:v('f_products'),bases:v('f_bases'),
     parking:document.getElementById('f_parking').checked,toilet:document.getElementById('f_toilet').checked,
     food:document.getElementById('f_food').checked,stay:document.getElementById('f_stay').checked,meeting:document.getElementById('f_meeting').checked,
-    visitors:v('f_visitors'),trained:v('f_trained'),income:v('f_income'),budget:v('f_budget'),support:v('f_support')
+    visitors:v('f_visitors'),trained:v('f_trained'),income:v('f_income'),budget:v('f_budget'),support:v('f_support'),
+    m_visitors:v('f_m_visitors'),m_trained:v('f_m_trained'),m_income:v('f_m_income')
   };
   const msg=document.getElementById('saveMsg'),btn=document.getElementById('saveBtn');
   btn.disabled=true; btn.textContent='กำลังบันทึก...';

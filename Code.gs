@@ -19,7 +19,7 @@
  *  เปลี่ยน PIN ศูนย์เดียว        -> Run  resetPin(2)  (ใส่ id ศูนย์) แล้วดู log
  ************************************************************/
 
-var SHEETS = { centers: 'Centers', survey: 'Survey', log: 'Log' };
+var SHEETS = { centers: 'Centers', survey: 'Survey', log: 'Log', monthly: 'Monthly' };
 
 var CENTER_HEADERS = ['id','name','type','district','tambon','lat','lng','emoji','contact','phone',
   'pin','established','area','members','highlight','tags','products','bases','story','facebook','hours',
@@ -28,7 +28,17 @@ var CENTER_HEADERS = ['id','name','type','district','tambon','lat','lng','emoji'
 
 var SURVEY_HEADERS = ['timestamp','centerId','role','q_content','q_speaker','q_place','q_apply','q_overall','learned','improve'];
 var LOG_HEADERS = ['timestamp','centerId','name','action','detail'];
+var MONTHLY_HEADERS = ['timestamp','centerId','fy','fmonth','visitors','trained','income'];
 var ASPECTS = ['q_content','q_speaker','q_place','q_apply','q_overall'];
+
+/* แปลงวันที่ -> ปีงบประมาณ (พ.ศ.) + ลำดับเดือนในปีงบ (1=ต.ค. ... 12=ก.ย.) */
+function fiscalOf(date){
+  var m = date.getMonth();           // 0=ม.ค. ... 11=ธ.ค.
+  var be = date.getFullYear() + 543;
+  if (m >= 9) return { fy: be + 1, fmonth: m - 8 };  // ต.ค.-ธ.ค. = ต้นปีงบถัดไป
+  return { fy: be, fmonth: m + 4 };                  // ม.ค.-ก.ย.
+}
+function num0(v){ var n = Number(v); return n > 0 ? n : 0; }
 
 /* ===================== Web app entry ===================== */
 // GET = อ่านข้อมูลสาธารณะเท่านั้น (ไม่มีความลับใน URL)
@@ -65,7 +75,8 @@ function routeGet(p){
   if (a === 'getAll')       return { ok:true, centers: readCenters(true) };
   if (a === 'getCenter')    return { ok:true, center: readCenters(true)[Number(p.id)] || null };
   if (a === 'submitSurvey') return submitSurvey(JSON.parse(p.data));
-  if (a === 'surveyStats')  return { ok:true, stats: surveyStats(Number(p.id)) };
+  if (a === 'surveyStats')  return { ok:true, stats: surveyStats(Number(p.id), Number(p.fy)||0, Number(p.fmonth)||0) };
+  if (a === 'getMonthly')   return { ok:true, monthly: getMonthly() };
   if (a === 'recentLog')    return { ok:true, log: recentLog() };
   return { ok:true, msg:'ศูนย์เรียนรู้ หนองบัวลำภู API พร้อมใช้งาน (อ่าน: getAll, getCenter, surveyStats, recentLog | เข้าสู่ระบบ/บันทึก ใช้ POST)' };
 }
@@ -233,6 +244,12 @@ function writeCenter(id, data){
       editable.forEach(function(k){ if (data[k] !== undefined){ var col=h.indexOf(k); if (col>-1) v[i][col]=data[k]; } });
       v[i][h.indexOf('updated')] = thaiDate();
       sh.getRange(i+1,1,1,h.length).setValues([v[i]]);
+      // บันทึกข้อมูลรายเดือน เฉพาะเมื่อกรอกค่ามาจริง (กันการเขียนทับด้วย 0)
+      var mv=num0(data.m_visitors), mt=num0(data.m_trained), mi=num0(data.m_income);
+      if (mv>0 || mt>0 || mi>0){
+        var f = fiscalOf(new Date());
+        saveMonthly(id, { fy:f.fy, fmonth:f.fmonth, visitors:mv, trained:mt, income:mi });
+      }
       appendLog(id, data.name || '', 'แก้ไขข้อมูลศูนย์');
       return { ok:true, msg:'บันทึกข้อมูลศูนย์เรียบร้อย' };
     }
@@ -249,8 +266,15 @@ function submitSurvey(d){
     d.learned || '', d.improve || '' ]);
   return { ok:true, msg:'ขอบคุณสำหรับการประเมิน' };
 }
-function surveyStats(id){
+function surveyStats(id, fy, fmonth){
   var rows = sheetObjects(getSheet(SHEETS.survey, SURVEY_HEADERS)).filter(function(s){ return Number(s.centerId) === id; });
+  if (fy){
+    rows = rows.filter(function(s){
+      var d = (s.timestamp instanceof Date) ? s.timestamp : new Date(s.timestamp);
+      var f = fiscalOf(d);
+      return f.fy === fy && (!fmonth || f.fmonth === fmonth);
+    });
+  }
   var agg = aggregate(rows);
   agg.learned = rows.map(function(r){ return r.learned; }).filter(String);
   agg.improve = rows.map(function(r){ return r.improve; }).filter(String);
@@ -280,6 +304,27 @@ function uploadImage(d){
   return { ok:true, url:'https://drive.google.com/uc?id=' + file.getId() };
 }
 
+/* ===================== Monthly time-series ===================== */
+function getMonthly(){
+  return sheetObjects(getSheet(SHEETS.monthly, MONTHLY_HEADERS)).map(function(r){
+    return { centerId:Number(r.centerId), fy:Number(r.fy), fmonth:Number(r.fmonth),
+      visitors:Number(r.visitors)||0, trained:Number(r.trained)||0, income:Number(r.income)||0 };
+  });
+}
+function saveMonthly(id, m){
+  var sh = getSheet(SHEETS.monthly, MONTHLY_HEADERS);
+  var v = sh.getDataRange().getValues(), h = v[0];
+  var ci=h.indexOf('centerId'), fyi=h.indexOf('fy'), fmi=h.indexOf('fmonth');
+  for (var i=1;i<v.length;i++){
+    if (Number(v[i][ci])===id && Number(v[i][fyi])===Number(m.fy) && Number(v[i][fmi])===Number(m.fmonth)){
+      v[i][h.indexOf('visitors')]=num0(m.visitors); v[i][h.indexOf('trained')]=num0(m.trained); v[i][h.indexOf('income')]=num0(m.income);
+      v[i][h.indexOf('timestamp')]=new Date();
+      sh.getRange(i+1,1,1,h.length).setValues([v[i]]); return;
+    }
+  }
+  sh.appendRow([ new Date(), id, Number(m.fy), Number(m.fmonth), num0(m.visitors), num0(m.trained), num0(m.income) ]);
+}
+
 /* ===================== Log ===================== */
 function appendLog(centerId, name, action, detail){
   getSheet(SHEETS.log, LOG_HEADERS).appendRow([ new Date(), centerId, name, action, detail || '' ]);
@@ -306,6 +351,7 @@ function setup(){
   getSheet(SHEETS.centers, CENTER_HEADERS);
   getSheet(SHEETS.survey, SURVEY_HEADERS);
   getSheet(SHEETS.log, LOG_HEADERS);
+  getSheet(SHEETS.monthly, MONTHLY_HEADERS);
   var sh = getSheet(SHEETS.centers, CENTER_HEADERS);
   if (sh.getLastRow() <= 1){
     // pin เว้นว่างไว้ (ช่องที่ 11) — จะถูกเจนเป็น hash ทีหลัง ไม่มี PIN จริงในโค้ด

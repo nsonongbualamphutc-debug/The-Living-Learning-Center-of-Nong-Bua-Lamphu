@@ -77,6 +77,7 @@ textarea:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 3px rgba(7
       <h1>ร่วมให้คะแนนศูนย์เรียนรู้</h1>
       <div class="cname" id="cname">กำลังโหลด...</div>
       <p>สำหรับผู้เข้าชมและผู้เข้าอบรม ความเห็นของท่านช่วยพัฒนาศูนย์ให้ดียิ่งขึ้น</p>
+      <p style="margin-top:6px;font-size:12.5px;color:#bcd0b4">📅 วันที่ประเมิน: <span id="todayLabel"></span></p>
     </div>
 
     <div class="err" id="err"></div>
@@ -111,7 +112,7 @@ textarea:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 3px rgba(7
 
 <script>
 /* ===== CONFIG: วางลิงก์ Web app จาก Apps Script ที่นี่ ===== */
-const CONFIG = { GAS_URL: 'https://script.google.com/macros/s/AKfycbxBaLvvyeQYE2nuPPC8K5aA6cPL7s6Chab7WWhR1PoWu1X3s3uR-Wc0AUmeypjyLrtk/exec' };  // เช่น 'https://script.google.com/macros/s/XXXX/exec'
+const CONFIG = { GAS_URL: '' };  // เช่น 'https://script.google.com/macros/s/XXXX/exec'
 
 /* ชุดคำถาม — ปรับ/เพิ่ม/ลดได้ (key ต้องตรงกับ Code.gs ASPECTS) */
 const QUESTIONS = [
@@ -231,6 +232,7 @@ function jsonp(url, params, cb){
 
 loadName();
 checkDuplicate();
+(function(){const t=document.getElementById('todayLabel'); if(t) t.textContent=new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});})();
 </script>
 </body>
 </html>
