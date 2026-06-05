@@ -74,6 +74,10 @@ textarea{resize:vertical;min-height:64px}
       <div class="bar"><span class="who" id="whoName"></span>
         <button class="btn" style="background:var(--muted);margin-left:auto;padding:9px 16px;font-size:13.5px" onclick="logout()">ออกจากระบบ</button>
       </div>
+      <div id="adminBar" style="display:none;background:var(--forest-900);color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:14px">
+        <label style="color:#fff;margin-top:0">👑 โหมดผู้ดูแลระบบ — เลือกศูนย์ที่จะจัดการ</label>
+        <select id="adminPicker" style="margin-top:2px"></select>
+      </div>
       <div class="readonly-note">⭐ <b>ความพึงพอใจ</b> ไม่ต้องกรอกที่นี่ — ระบบคำนวณจากแบบประเมินของผู้เข้าชม/ผู้อบรมโดยอัตโนมัติ</div>
 
       <fieldset class="fieldset"><legend>ข้อมูลทั่วไป</legend>
@@ -157,9 +161,9 @@ textarea{resize:vertical;min-height:64px}
 
 <script>
 /* ===== CONFIG: วางลิงก์ Web app จาก Apps Script ===== */
-const CONFIG = { GAS_URL: 'https://script.google.com/macros/s/AKfycbxBaLvvyeQYE2nuPPC8K5aA6cPL7s6Chab7WWhR1PoWu1X3s3uR-Wc0AUmeypjyLrtk/exec' };
+const CONFIG = { GAS_URL: '' };
 
-let CENTERS = [], current = null, TOKEN = '';
+let CENTERS = [], current = null, TOKEN = '', IS_ADMIN = false;
 
 function jsonp(url, params, cb){
   const name='cb_'+Math.random().toString(36).slice(2); params.callback=name;
@@ -179,33 +183,52 @@ function loadCenters(){
     document.getElementById('loginCenter').innerHTML='<option value="0">(สาธิต) ศูนย์ตัวอย่าง</option>'; return; }
   jsonp(CONFIG.GAS_URL,{action:'getAll'},r=>{
     if(r&&r.ok){ CENTERS=r.centers;
-      document.getElementById('loginCenter').innerHTML=CENTERS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      document.getElementById('loginCenter').innerHTML=
+        '<option value="admin">👑 ผู้ดูแลระบบ (จัดการได้ทุกศูนย์)</option>'+
+        CENTERS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
     }
   });
 }
 
 function login(){
-  const id=+document.getElementById('loginCenter').value, p=document.getElementById('loginPin').value.trim();
+  const sel=document.getElementById('loginCenter').value, p=document.getElementById('loginPin').value.trim();
   const msg=document.getElementById('loginMsg'); msg.className='msg';
   if(!p){ msg.className='msg bad'; msg.textContent='กรุณากรอกรหัส PIN'; return; }
   if(!CONFIG.GAS_URL){ msg.className='msg bad'; msg.textContent='ยังไม่ได้เชื่อมต่อระบบหลังบ้าน'; return; }
+  const idParam = (sel==='admin') ? 'admin' : (+sel);
   const btn=document.getElementById('loginBtn'); btn.disabled=true; btn.textContent='กำลังตรวจสอบ...';
-  postJSON({action:'login',id:id,pin:p}).then(r=>{
+  postJSON({action:'login',id:idParam,pin:p}).then(r=>{
     btn.disabled=false; btn.textContent='เข้าสู่ระบบ';
-    if(r&&r.ok&&r.token){ TOKEN=r.token; openEditor(id); }
-    else { msg.className='msg bad'; msg.textContent=(r&&r.error)||'รหัส PIN ไม่ถูกต้อง'; }
+    if(r&&r.ok&&r.token){
+      TOKEN=r.token; IS_ADMIN=(r.role==='admin');
+      if(IS_ADMIN) openAdminEditor(); else openEditor(+sel);
+    } else { msg.className='msg bad'; msg.textContent=(r&&r.error)||'รหัส PIN ไม่ถูกต้อง'; }
   }).catch(()=>{ btn.disabled=false; btn.textContent='เข้าสู่ระบบ'; msg.className='msg bad'; msg.textContent='เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง'; });
 }
 
+function openAdminEditor(){
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('editor').style.display='block';
+  const bar=document.getElementById('adminBar'); bar.style.display='block';
+  const pick=document.getElementById('adminPicker');
+  pick.innerHTML=CENTERS.map(c=>`<option value="${c.id}">${c.name} (อ.${c.district})</option>`).join('');
+  pick.onchange=()=>loadCenter(+pick.value);
+  loadCenter(CENTERS[0].id);
+  window.scrollTo(0,0);
+}
+
 function openEditor(id){
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('editor').style.display='block';
+  loadCenter(id);
+  window.scrollTo(0,0);
+}
+function loadCenter(id){
   jsonp(CONFIG.GAS_URL,{action:'getCenter',id:id},r=>{
     if(!r||!r.center) return;
     current=r.center;
-    document.getElementById('loginCard').style.display='none';
-    document.getElementById('editor').style.display='block';
-    document.getElementById('whoName').textContent='กำลังแก้ไข: '+current.name+' (อ.'+current.district+')';
+    document.getElementById('whoName').textContent=(IS_ADMIN?'👑 ผู้ดูแลระบบ — ':'กำลังแก้ไข: ')+current.name+' (อ.'+current.district+')';
     fill(current);
-    window.scrollTo(0,0);
   });
 }
 function v(id){return document.getElementById(id).value;}
