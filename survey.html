@@ -111,7 +111,7 @@ textarea:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 3px rgba(7
 
 <script>
 /* ===== CONFIG: วางลิงก์ Web app จาก Apps Script ที่นี่ ===== */
-const CONFIG = { GAS_URL: 'https://script.google.com/macros/s/AKfycbxBaLvvyeQYE2nuPPC8K5aA6cPL7s6Chab7WWhR1PoWu1X3s3uR-Wc0AUmeypjyLrtk/exec' };  // เช่น 'https://script.google.com/macros/s/XXXX/exec'
+const CONFIG = { GAS_URL: '' };  // เช่น 'https://script.google.com/macros/s/XXXX/exec'
 
 /* ชุดคำถาม — ปรับ/เพิ่ม/ลดได้ (key ต้องตรงกับ Code.gs ASPECTS) */
 const QUESTIONS = [
@@ -123,11 +123,11 @@ const QUESTIONS = [
 ];
 const LEVEL = ['','น้อยที่สุด','น้อย','ปานกลาง','มาก','มากที่สุด'];
 
-const centerId = parseInt(new URLSearchParams(location.search).get('id'), 10);
+let centerId = parseInt(new URLSearchParams(location.search).get('id'), 10);
 const state = { role:'', ratings:{} };
 
-/* ถ้าไม่มี id (เข้ามาจากลิงก์รวม) ให้เลือกศูนย์ก่อน */
-if(isNaN(centerId)){ showPicker(); }
+/* ถ้าไม่มี id ที่ถูกต้อง (เข้ามาจากลิงก์รวม) ให้เลือกศูนย์ก่อน */
+if(!(centerId >= 0)){ showPicker(); }
 
 function showPicker(){
   document.getElementById('card').innerHTML=`<div class="head">
@@ -143,7 +143,11 @@ function showPicker(){
     if(r&&r.ok) sel.innerHTML=r.centers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   });
 }
-function goPick(){ location.search='?id='+document.getElementById('pick').value; }
+function goPick(){
+  const v = document.getElementById('pick').value;
+  if(v==='' || !(+v >= 0)){ alert('กรุณาเลือกศูนย์เรียนรู้ก่อน'); return; }
+  location.href = 'survey.html?id=' + (+v);
+}
 
 /* build star questions */
 document.getElementById('questions').innerHTML = QUESTIONS.map(q=>`
@@ -177,6 +181,7 @@ function loadName(){
 function showErr(m){ const e=document.getElementById('err'); e.textContent=m; e.style.display='block'; }
 
 function submitSurvey(){
+  if(!(centerId >= 0)){ showErr('ไม่พบศูนย์ที่จะประเมิน กรุณาเปิดจาก QR ของศูนย์ หรือเลือกศูนย์ใหม่'); return; }
   if(!state.role){ showErr('กรุณาเลือกว่าท่านเป็นผู้เข้าชมหรือผู้เข้าอบรม'); return; }
   if(!state.ratings.q_overall){ showErr('กรุณาให้คะแนนความพึงพอใจโดยรวมอย่างน้อย 1 ข้อ'); return; }
   const payload = Object.assign({
