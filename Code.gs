@@ -77,6 +77,7 @@ function routeGet(p){
   if (a === 'submitSurvey') return submitSurvey(JSON.parse(p.data));
   if (a === 'surveyStats')  return { ok:true, stats: surveyStats(Number(p.id), Number(p.fy)||0, Number(p.fmonth)||0) };
   if (a === 'getMonthly')   return { ok:true, monthly: getMonthly() };
+  if (a === 'satTrend')     return { ok:true, trend: satTrend(Number(p.fy)||0) };
   if (a === 'recentLog')    return { ok:true, log: recentLog() };
   return { ok:true, msg:'ศูนย์เรียนรู้ หนองบัวลำภู API พร้อมใช้งาน (อ่าน: getAll, getCenter, surveyStats, recentLog | เข้าสู่ระบบ/บันทึก ใช้ POST)' };
 }
@@ -323,6 +324,22 @@ function saveMonthly(id, m){
     }
   }
   sh.appendRow([ new Date(), id, Number(m.fy), Number(m.fmonth), num0(m.visitors), num0(m.trained), num0(m.income) ]);
+}
+
+/* แนวโน้มความพึงพอใจเฉลี่ยรายเดือน (ลำดับปีงบ 1=ต.ค. .. 12=ก.ย.) ของปีงบ fy
+   - per: ค่าเฉลี่ย q_overall รายเดือน, perCenter: แยกรายศูนย์ */
+function satTrend(fy){
+  var rows = sheetObjects(getSheet(SHEETS.survey, SURVEY_HEADERS));
+  var sums = []; for (var i=0;i<12;i++) sums.push({sum:0,n:0});
+  rows.forEach(function(s){
+    var ov = Number(s.q_overall); if (!(ov>0)) return;
+    var d = (s.timestamp instanceof Date) ? s.timestamp : new Date(s.timestamp);
+    var f = fiscalOf(d);
+    if (fy && f.fy !== fy) return;
+    var idx = f.fmonth - 1; if (idx<0||idx>11) return;
+    sums[idx].sum += ov; sums[idx].n += 1;
+  });
+  return sums.map(function(x){ return x.n ? Math.round(x.sum/x.n*100)/100 : 0; });
 }
 
 /* ===================== Log ===================== */
