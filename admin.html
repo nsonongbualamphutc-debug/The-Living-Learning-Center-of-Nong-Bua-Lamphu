@@ -157,9 +157,9 @@ textarea{resize:vertical;min-height:64px}
 
 <script>
 /* ===== CONFIG: วางลิงก์ Web app จาก Apps Script ===== */
-const CONFIG = { GAS_URL: 'https://script.google.com/macros/s/AKfycbxBaLvvyeQYE2nuPPC8K5aA6cPL7s6Chab7WWhR1PoWu1X3s3uR-Wc0AUmeypjyLrtk/exec' };
+const CONFIG = { GAS_URL: '' };
 
-let CENTERS = [], current = null, pin = '';
+let CENTERS = [], current = null, TOKEN = '';
 
 function jsonp(url, params, cb){
   const name='cb_'+Math.random().toString(36).slice(2); params.callback=name;
@@ -168,6 +168,10 @@ function jsonp(url, params, cb){
   const s=document.createElement('script'); s.src=url+'?'+qs;
   s.onerror=()=>{cb(null);delete window[name];s.remove();};
   document.body.appendChild(s);
+}
+/* ส่งข้อมูลที่ต้องยืนยันตัวตนผ่าน POST (PIN/token ไม่อยู่ใน URL) */
+function postJSON(payload){
+  return fetch(CONFIG.GAS_URL,{method:'POST',body:JSON.stringify(payload)}).then(r=>r.json());
 }
 
 function loadCenters(){
@@ -186,11 +190,11 @@ function login(){
   if(!p){ msg.className='msg bad'; msg.textContent='กรุณากรอกรหัส PIN'; return; }
   if(!CONFIG.GAS_URL){ msg.className='msg bad'; msg.textContent='ยังไม่ได้เชื่อมต่อระบบหลังบ้าน'; return; }
   const btn=document.getElementById('loginBtn'); btn.disabled=true; btn.textContent='กำลังตรวจสอบ...';
-  jsonp(CONFIG.GAS_URL,{action:'login',id:id,pin:p},r=>{
+  postJSON({action:'login',id:id,pin:p}).then(r=>{
     btn.disabled=false; btn.textContent='เข้าสู่ระบบ';
-    if(r&&r.valid){ pin=p; openEditor(id); }
-    else { msg.className='msg bad'; msg.textContent='รหัส PIN ไม่ถูกต้อง'; }
-  });
+    if(r&&r.ok&&r.token){ TOKEN=r.token; openEditor(id); }
+    else { msg.className='msg bad'; msg.textContent=(r&&r.error)||'รหัส PIN ไม่ถูกต้อง'; }
+  }).catch(()=>{ btn.disabled=false; btn.textContent='เข้าสู่ระบบ'; msg.className='msg bad'; msg.textContent='เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง'; });
 }
 
 function openEditor(id){
@@ -230,12 +234,12 @@ function save(){
   };
   const msg=document.getElementById('saveMsg'),btn=document.getElementById('saveBtn');
   btn.disabled=true; btn.textContent='กำลังบันทึก...';
-  jsonp(CONFIG.GAS_URL,{action:'saveCenter',id:current.id,pin:pin,data:JSON.stringify(data)},r=>{
+  postJSON({action:'saveCenter',id:current.id,token:TOKEN,data:JSON.stringify(data)}).then(r=>{
     btn.disabled=false; btn.textContent='💾 บันทึกข้อมูล';
     if(r&&r.ok){ msg.className='msg ok'; msg.textContent='✓ '+(r.msg||'บันทึกเรียบร้อย'); }
     else { msg.className='msg bad'; msg.textContent='✗ '+((r&&r.error)||'บันทึกไม่สำเร็จ'); }
     window.scrollTo(0,document.body.scrollHeight);
-  });
+  }).catch(()=>{ btn.disabled=false; btn.textContent='💾 บันทึกข้อมูล'; msg.className='msg bad'; msg.textContent='✗ เชื่อมต่อไม่สำเร็จ'; });
 }
 function logout(){ location.reload(); }
 
@@ -252,7 +256,7 @@ async function uploadImages(input){
     try{
       const b64=await fileToB64(f);
       const res=await fetch(CONFIG.GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body:JSON.stringify({action:'uploadImage',id:current.id,pin:pin,name:f.name,mime:f.type,data:b64})});
+        body:JSON.stringify({action:'uploadImage',token:TOKEN,name:f.name,mime:f.type,data:b64})});
       const j=await res.json();
       if(j&&j.ok&&j.url){ box.value=(box.value.trim()?box.value.trim()+' | ':'')+j.url; done++; }
       else { st.textContent='✗ อัปโหลดไม่สำเร็จ: '+((j&&j.error)||'')+' — ลองวางลิงก์เอง'; return; }
