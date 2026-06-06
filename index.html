@@ -633,7 +633,7 @@ const fmt=n=>n.toLocaleString('th-TH');
 const AMEN={parking:["🅿️","ที่จอดรถ"],toilet:["🚻","ห้องน้ำ"],food:["🍽️","อาหาร"],stay:["🛏️","ที่พัก"],meeting:["🏛️","ห้องประชุม"]};
 
 /* ===== CONFIG: วางลิงก์ Web app จาก Apps Script เพื่อใช้ข้อมูลสด ===== */
-const CONFIG={GAS_URL:''};   // ว่าง = ใช้ข้อมูลตัวอย่างด้านบน
+const CONFIG={GAS_URL:'https://script.google.com/macros/s/AKfycbxBaLvvyeQYE2nuPPC8K5aA6cPL7s6Chab7WWhR1PoWu1X3s3uR-Wc0AUmeypjyLrtk/exec'};   // ว่าง = ใช้ข้อมูลตัวอย่างด้านบน
 function jsonp(url,params,cb){
   const name='cb_'+Math.random().toString(36).slice(2); params.callback=name;
   const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
