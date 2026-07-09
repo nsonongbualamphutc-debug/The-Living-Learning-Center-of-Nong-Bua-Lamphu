@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ศูนย์เรียนรู้ที่มีชีวิต | จังหวัดหนองบัวลำภู</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --forest-950:#0f2818; --forest-900:#14331f; --forest-800:#1c4a2c; --forest-700:#266038;
+  --leaf:#4a8c3f; --leaf-soft:#e8f0df;
+  --gold:#c8962b; --gold-bright:#e2a82c; --gold-soft:#f5ebd4;
+  --cream:#f6f2e8; --paper:#fffdf7; --ink:#23251c; --muted:#7a7a6a;
+  --line:#e6e1d3; --line-soft:#efebdf;
+  --teal:#159486; --teal-bright:#1BB3A0; --coral:#a4502a; --sky:#2f6ea3;
+  --r:18px; --r-sm:12px;
+  --sh-sm:0 1px 2px rgba(20,40,20,.06); --sh:0 4px 18px rgba(20,40,20,.08); --sh-lg:0 16px 44px rgba(20,40,20,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Sarabun',sans-serif;background:var(--cream);color:var(--ink);line-height:1.65;
+  background-image:radial-gradient(circle at 12% 8%,rgba(74,140,63,.05),transparent 40%),radial-gradient(circle at 88% 92%,rgba(200,150,43,.06),transparent 42%)}
+h1,h2,h3,h4,.display,.num-big{font-family:'Kanit',sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:0 22px}
+::selection{background:var(--gold-soft)}
+
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;animation:rise .7s cubic-bezier(.2,.7,.3,1) forwards}
+.d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}.d4{animation-delay:.35s}.d5{animation-delay:.45s}.d6{animation-delay:.55s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+#viewPublic:not(.hide),#viewExec:not(.hide){animation:fade .45s ease}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ad07a;margin-right:6px;vertical-align:middle;animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(74,208,122,.5)}70%{box-shadow:0 0 0 7px rgba(74,208,122,0)}100%{box-shadow:0 0 0 0 rgba(74,208,122,0)}}
+
+.govbar{background:var(--forest-950);color:#dfe8da}
+.govbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 22px;font-size:12.5px;flex-wrap:wrap}
+.govbar .gb-l{display:flex;align-items:center;gap:9px;letter-spacing:.2px}
+.govbar .gb-seal{width:22px;height:22px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px}
+.govbar .gb-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gb-link{color:#fff;text-decoration:none;font-family:'Kanit';font-size:12.5px;font-weight:400;padding:5px 12px;
+  border:1px solid rgba(255,255,255,.22);border-radius:20px;transition:.18s;white-space:nowrap}
+.gb-link:hover{background:rgba(255,255,255,.13);border-color:rgba(226,168,44,.5)}
+.gb-link.staff{border-color:rgba(226,168,44,.35);color:var(--gold-bright)}
+.gb-date{opacity:.55;white-space:nowrap;margin-left:4px}
+@media(max-width:600px){.gb-date{display:none}.govbar .gb-l{font-size:12px}}
+
+.hero{position:relative;background:linear-gradient(160deg,var(--forest-900) 0%,var(--forest-800) 55%,var(--forest-700) 120%);color:#fff;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;
+  background-image:radial-gradient(circle at 85% 20%,rgba(226,168,44,.18),transparent 45%),
+   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 60L60 0M30 60L60 30M0 30L30 0' stroke='%23ffffff' stroke-opacity='0.04' stroke-width='1'/%3E%3C/svg%3E");}
+.hero .wrap{position:relative;z-index:2;padding:46px 22px 40px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(226,168,44,.16);color:var(--gold-bright);
+  font-family:'Kanit';font-size:13px;font-weight:500;padding:6px 15px;border-radius:30px;border:1px solid rgba(226,168,44,.3);letter-spacing:.3px}
+.hero h1{font-size:clamp(30px,5vw,52px);font-weight:700;line-height:1.08;margin:18px 0 14px;letter-spacing:-.5px}
+.hero h1 .accent{color:var(--gold-bright);white-space:nowrap}
+.hero-lead{font-size:clamp(15px,2vw,18px);max-width:660px;color:#d7e3d0;font-weight:300;line-height:1.7}
+.pillars{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.pillar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  padding:8px 16px;border-radius:12px;font-family:'Kanit';font-size:14px;font-weight:400}
+.pillar i{font-style:normal;font-size:17px}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:36px}
+.hstat{padding:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:var(--r);
+  position:relative;overflow:hidden;transition:.25s}
+.hstat:hover{transform:translateY(-4px);background:rgba(255,255,255,.11);border-color:rgba(226,168,44,.4)}
+.hstat::after{content:"";position:absolute;right:-20px;top:-20px;width:72px;height:72px;border-radius:50%;background:rgba(226,168,44,.08)}
+.hstat .hs-ico{font-size:21px;width:42px;height:42px;border-radius:12px;background:rgba(226,168,44,.16);
+  display:flex;align-items:center;justify-content:center;margin-bottom:13px;border:1px solid rgba(226,168,44,.25)}
+.hstat .hs-num{font-family:'Kanit';font-size:34px;font-weight:700;line-height:1;color:#fff;position:relative;z-index:1}
+.hstat .hs-num small{font-size:16px;font-weight:400;color:var(--gold-bright)}
+.hstat .hs-lab{font-size:13px;color:#bcccb4;margin-top:6px}
+@media(max-width:680px){.hero-stats{grid-template-columns:repeat(2,1fr)}}
+
+.toggle-wrap{display:flex;justify-content:center;margin-top:-26px;position:relative;z-index:5}
+.toggle{display:inline-flex;background:var(--paper);border-radius:40px;padding:6px;box-shadow:var(--sh-lg);border:1px solid var(--line)}
+.toggle button{font-family:'Kanit';font-size:15px;font-weight:500;border:none;background:transparent;color:var(--muted);
+  padding:11px 26px;border-radius:34px;cursor:pointer;transition:.25s;display:flex;align-items:center;gap:8px}
+.toggle button.active{background:var(--forest-800);color:#fff;box-shadow:0 4px 14px rgba(28,74,44,.32)}
+.toggle button i{font-style:normal;font-size:17px}
+
+.sec-head{margin:40px 0 22px}
+.sec-tag{font-family:'Kanit';font-size:13px;font-weight:600;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase}
+.sec-head h2{font-size:clamp(23px,3.2vw,32px);font-weight:600;line-height:1.15;margin-top:4px;color:var(--forest-900)}
+.sec-head p{font-size:14.5px;color:var(--muted);margin-top:7px;max-width:680px}
+
+.filterbar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;background:var(--paper);
+  border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh-sm);margin-bottom:18px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:12px;color:var(--muted);font-weight:600;font-family:'Kanit';letter-spacing:.3px}
+.fg select,.fg input{font-family:'Sarabun';font-size:14.5px;padding:10px 13px;border:1px solid var(--line);
+  border-radius:10px;background:#fff;color:var(--ink);min-width:165px;transition:.2s}
+.fg input{min-width:210px}
+.fg select:focus,.fg input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 3px rgba(74,140,63,.13)}
+.count-pill{margin-left:auto;align-self:center;background:var(--forest-800);color:#fff;font-family:'Kanit';
+  font-weight:500;font-size:14px;padding:9px 18px;border-radius:24px;display:flex;align-items:center;gap:7px}
+
+.map-shell{position:relative;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);border:1px solid var(--line);margin-bottom:34px}
+#map{height:400px;z-index:1}
+.legend{position:absolute;left:14px;bottom:14px;z-index:500;background:rgba(255,253,247,.95);
+  border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 14px;box-shadow:var(--sh);max-width:220px}
+.legend .lg-title{font-family:'Kanit';font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;letter-spacing:.4px}
+.legend .lg-item{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:5px}
+.legend .lg-item:last-child{margin-bottom:0}
+.legend .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 2px #fff}
+@media(max-width:560px){.legend{position:static;max-width:none;margin:10px;border:none;box-shadow:none}}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+.card{background:var(--paper);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);
+  box-shadow:var(--sh-sm);display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s;position:relative}
+.card:hover{transform:translateY(-5px);box-shadow:var(--sh-lg)}
+.card-photo{height:158px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card-photo .bigmoji{font-size:74px;opacity:.9;filter:drop-shadow(0 4px 8px rgba(0,0,0,.12));transition:transform .35s}
+.card:hover .card-photo .bigmoji{transform:scale(1.08) rotate(-3deg)}
+.card-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(15,40,24,.32))}
+.idx{position:absolute;top:12px;right:14px;z-index:2;font-family:'Kanit';font-size:13px;font-weight:600;color:#fff;
+  background:rgba(15,40,24,.35);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.ribbon{position:absolute;left:0;bottom:12px;z-index:2;font-family:'Kanit';font-size:12.5px;font-weight:500;color:#fff;
+  padding:5px 14px 5px 13px;border-radius:0 20px 20px 0;display:flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.card-body{padding:17px 19px 19px;display:flex;flex-direction:column;gap:11px;flex:1}
+.card-title{font-family:'Kanit';font-size:18px;font-weight:600;line-height:1.25;color:var(--forest-900)}
+.card-loc{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.card-loc i{font-style:normal}
+.quote{font-size:13.5px;color:#4a4d3c;line-height:1.6;border-left:3px solid var(--gold);padding:3px 0 3px 12px;background:linear-gradient(90deg,var(--gold-soft),transparent);border-radius:0 6px 6px 0}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:11.5px;font-family:'Kanit';font-weight:400;background:var(--leaf-soft);color:var(--forest-700);padding:4px 11px;border-radius:14px}
+.meta{display:flex;gap:8px;padding:11px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
+.meta .m{flex:1;text-align:center}
+.meta .m .mv{font-family:'Kanit';font-size:18px;font-weight:600;color:var(--forest-900);line-height:1}
+.meta .m .mv small{font-size:11px;color:var(--muted);font-weight:400}
+.meta .m .ml{font-size:11px;color:var(--muted);margin-top:3px}
+.meta .m+.m{border-left:1px solid var(--line)}
+.amen{display:flex;gap:9px;font-size:16px}
+.amen span{opacity:.25;filter:grayscale(1)}
+.amen span.on{opacity:1;filter:none}
+.contact{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;line-height:1.4}
+.card-foot{display:flex;gap:9px;margin-top:auto}
+.btn{flex:1;text-align:center;font-family:'Kanit';font-size:14px;font-weight:500;padding:11px;border-radius:11px;
+  border:none;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;transition:.18s}
+.btn-go{background:var(--forest-800);color:#fff}
+.btn-go:hover{background:var(--forest-900)}
+.btn-info{background:#fff;color:var(--forest-700);border:1.5px solid var(--leaf)}
+.btn-info:hover{background:var(--leaf-soft)}
+.btn-detail{background:var(--gold);color:#fff;width:100%;margin-top:9px}
+.btn-detail:hover{background:#b3831f}
+
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px}
+
+/* AUTO INSIGHT bar */
+.insight-wrap{margin-bottom:22px}
+.insight-hero{background:linear-gradient(135deg,var(--forest-900),var(--forest-700));color:#fff;border-radius:18px;
+  padding:20px 24px;box-shadow:var(--sh-lg);position:relative;overflow:hidden;margin-bottom:14px}
+.insight-hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;
+  background:radial-gradient(circle,rgba(226,168,44,.25),transparent 70%);border-radius:50%}
+.insight-hero .ih-tag{font-family:'Kanit';font-size:12px;font-weight:500;color:var(--gold-bright);letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.insight-hero .ih-text{font-family:'Kanit';font-size:clamp(16px,2.4vw,21px);font-weight:500;line-height:1.45;position:relative;z-index:1}
+.insight-hero .ih-text b{color:var(--gold-bright);font-weight:600}
+.insight-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:13px}
+.ins-card{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--leaf);border-radius:13px;
+  padding:15px 17px;box-shadow:var(--sh-sm);display:flex;gap:13px;align-items:flex-start;transition:transform .15s}
+.ins-card:hover{transform:translateY(-2px)}
+.ins-card.warn{border-left-color:var(--coral)}
+.ins-card.gold{border-left-color:var(--gold)}
+.ins-card.teal{border-left-color:var(--teal)}
+.ins-card .ic-ico{font-size:24px;line-height:1}
+.ins-card .ic-lab{font-size:12px;color:var(--muted);font-family:'Kanit'}
+.ins-card .ic-main{font-family:'Kanit';font-size:15.5px;font-weight:600;color:var(--forest-900);line-height:1.3;margin-top:2px}
+.ins-card .ic-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.ins-trend{font-family:'Kanit';font-weight:600;font-size:12.5px;padding:1px 7px;border-radius:8px;display:inline-block;margin-top:4px}
+.ins-trend.up{background:var(--leaf-soft);color:var(--forest-700)}
+.ins-trend.down{background:#fbeae6;color:var(--coral)}
+.ins-trend.flat{background:#f0ecde;color:var(--muted)}
+@media(max-width:560px){.insight-hero{padding:17px 18px}}
+
+.chart-note{font-size:12px;color:var(--muted);margin-top:8px;text-align:center}
+
+/* compare centers */
+.compare-box{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--sh-sm);margin-bottom:18px}
+.cmp-head{display:flex;gap:13px;align-items:center;margin-bottom:16px}
+.cmp-head .dt-ico{font-size:24px}
+.cmp-head h3{font-family:'Kanit';font-size:17px;font-weight:600;color:var(--forest-900);margin:0}
+.cmp-head .dt-sub{font-size:13px;color:var(--muted)}
+.cmp-pick{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:18px}
+.cmp-chip{font-family:'Kanit';font-size:13px;padding:8px 14px;border-radius:22px;border:1.5px solid var(--line);
+  background:#fff;color:var(--ink);cursor:pointer;transition:.15s;user-select:none}
+.cmp-chip:hover{border-color:var(--leaf)}
+.cmp-chip.on{background:var(--forest-800);color:#fff;border-color:var(--forest-800)}
+.cmp-chip.dis{opacity:.4;cursor:not-allowed}
+.cmp-grid{display:grid;gap:14px}
+.cmp-card{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.cmp-card .cc-head{padding:13px 16px;color:#fff}
+.cmp-card .cc-name{font-family:'Kanit';font-weight:600;font-size:15px;line-height:1.25}
+.cmp-card .cc-loc{font-size:12px;opacity:.9;margin-top:2px}
+.cmp-metrics{display:grid;grid-template-columns:repeat(2,1fr)}
+.cmp-metric{padding:12px 16px;border-top:1px solid var(--line)}
+.cmp-metric:nth-child(odd){border-right:1px solid var(--line)}
+.cmp-metric .m-lab{font-size:11.5px;color:var(--muted);font-family:'Kanit'}
+.cmp-metric .m-val{font-family:'Kanit';font-weight:700;font-size:18px;color:var(--forest-900);margin-top:2px}
+.cmp-metric .m-val.best{color:var(--leaf)}
+.cmp-metric .m-val small{font-size:11px;font-weight:400;color:var(--muted)}
+.cmp-empty{color:var(--muted);font-size:13.5px;padding:6px 0}
+@media(min-width:680px){.cmp-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}}
+
+/* present mode (จอใหญ่) */
+.present-overlay{position:fixed;inset:0;background:linear-gradient(150deg,#0d2616,#14331f 55%,#1c4a2c);z-index:9999;
+  display:none;flex-direction:column;color:#fff;padding:clamp(20px,4vw,56px)}
+.present-overlay.show{display:flex}
+.present-close{position:absolute;top:18px;right:20px;background:rgba(255,255,255,.13);color:#fff;border:1px solid rgba(255,255,255,.25);
+  border-radius:22px;padding:8px 16px;font-family:'Kanit';font-size:13px;cursor:pointer}
+.present-close:hover{background:rgba(255,255,255,.22)}
+.present-inner{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1200px;margin:0 auto;width:100%}
+.present-nav{display:flex;align-items:center;justify-content:center;gap:18px;padding-top:18px}
+.present-nav button{background:var(--gold);color:#231a00;border:none;border-radius:11px;padding:11px 22px;font-family:'Kanit';font-weight:600;font-size:15px;cursor:pointer}
+.present-nav button:hover{background:var(--gold-bright)}
+#presentDots{font-size:13px;opacity:.7;letter-spacing:3px}
+.p-eyebrow{font-family:'Kanit';color:var(--gold-bright);font-size:clamp(14px,1.8vw,18px);font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.p-title{font-family:'Kanit';font-weight:700;font-size:clamp(28px,5vw,56px);line-height:1.1;margin-bottom:10px}
+.p-sub{font-size:clamp(15px,2vw,22px);color:#cdddc6;margin-bottom:34px}
+.p-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:clamp(16px,2.5vw,30px)}
+.p-stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:clamp(18px,2.6vw,30px)}
+.p-stat .ps-num{font-family:'Kanit';font-weight:700;font-size:clamp(30px,5.5vw,60px);color:var(--gold-bright);line-height:1}
+.p-stat .ps-lab{font-family:'Kanit';font-size:clamp(13px,1.6vw,18px);color:#dfe8da;margin-top:8px}
+.p-list{display:flex;flex-direction:column;gap:clamp(10px,1.6vw,16px)}
+.p-rank{display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.07);border-radius:14px;padding:clamp(12px,1.8vw,18px) clamp(16px,2.2vw,24px)}
+.p-rank .pr-no{font-family:'Kanit';font-weight:700;font-size:clamp(20px,3vw,30px);color:var(--gold-bright);min-width:44px}
+.p-rank .pr-name{font-family:'Kanit';font-weight:500;font-size:clamp(15px,2vw,23px);flex:1}
+.p-rank .pr-val{font-family:'Kanit';font-weight:700;font-size:clamp(16px,2.2vw,26px);color:#fff}
+.p-rank .pr-bar{height:8px;background:rgba(255,255,255,.15);border-radius:6px;overflow:hidden;flex:1;max-width:240px}
+.p-rank .pr-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-bright));border-radius:6px}
+@media(max-width:560px){.p-rank .pr-bar{display:none}}
+.kpi-card{background:var(--paper);border-radius:var(--r);padding:22px;box-shadow:var(--sh-sm);border:1px solid var(--line);position:relative;overflow:hidden}
+.kpi-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--leaf)}
+.kpi-card.c2::before{background:var(--sky)}.kpi-card.c3::before{background:var(--gold)}
+.kpi-card.c4::before{background:var(--teal)}.kpi-card.c5::before{background:var(--coral)}
+.kpi-ico{font-size:22px;opacity:.85}
+.kpi-label{font-size:13px;color:var(--muted);font-weight:600;font-family:'Kanit';margin-top:8px}
+.kpi-value{font-family:'Kanit';font-size:36px;font-weight:700;color:var(--forest-900);line-height:1;margin-top:6px}
+.kpi-value small{font-size:15px;font-weight:400;color:var(--muted)}
+.kpi-note{font-size:12px;color:var(--leaf);margin-top:7px;font-weight:500}
+.chart-row{display:grid;grid-template-columns:1.45fr 1fr;gap:18px;margin-bottom:18px}
+.chart-box{background:var(--paper);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh-sm);border:1px solid var(--line)}
+.chart-box h3{font-family:'Kanit';font-size:16px;font-weight:500;margin-bottom:16px;color:var(--forest-900);display:flex;align-items:center;gap:8px}
+.chart-box canvas{max-height:300px}
+.table-box{background:var(--paper);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh-sm);border:1px solid var(--line);overflow-x:auto}
+.table-box h3{font-family:'Kanit';font-size:16px;font-weight:500;margin-bottom:16px;color:var(--forest-900)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;padding:11px 13px;border-bottom:2px solid var(--line);color:var(--muted);font-weight:600;font-size:12.5px;font-family:'Kanit';white-space:nowrap;letter-spacing:.3px}
+td{padding:11px 13px;border-bottom:1px solid var(--line-soft)}
+td:first-child{font-weight:500;color:var(--forest-900)}
+tr:hover td{background:var(--gold-soft)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.hide{display:none}
+
+/* ===== Satisfaction star panel ===== */
+.sat-box{background:var(--paper);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh-sm);border:1px solid var(--line);margin-bottom:18px}
+.sat-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.sat-top h3{font-family:'Kanit';font-size:16px;font-weight:500;color:var(--forest-900);display:flex;align-items:center;gap:8px}
+.sat-overall{display:flex;align-items:center;gap:20px;background:linear-gradient(120deg,var(--forest-900),var(--forest-700));color:#fff;border-radius:14px;padding:12px 22px;flex-wrap:wrap}
+.so-left{display:flex;align-items:center;gap:13px}
+.so-num{font-family:'Kanit';font-size:30px;font-weight:700;color:var(--gold-bright);line-height:1}
+.so-num small{font-size:15px;color:#cdddc6;font-weight:400}
+.so-right{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.so-pct{font-size:13px;color:#cdddc6}.so-pct b{color:#fff;font-family:'Kanit'}
+.stars{position:relative;display:inline-block;font-size:19px;line-height:1;letter-spacing:2px;font-family:Arial,sans-serif;white-space:nowrap}
+.s-base{color:rgba(255,255,255,.28)}
+.s-fill{color:var(--gold-bright);position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;transition:width 1.1s cubic-bezier(.2,.7,.3,1)}
+.sat-list{display:flex;flex-direction:column;gap:2px}
+.sat-row{display:grid;grid-template-columns:1.5fr auto auto;align-items:center;gap:14px;padding:11px 6px;border-bottom:1px solid var(--line-soft);transition:background .2s}
+.sat-row:last-child{border-bottom:none}
+.sat-row:hover{background:var(--gold-soft);border-radius:8px}
+.sat-name{font-size:14px;color:var(--forest-900);font-weight:500}
+.sat-stars .stars{font-size:17px}
+.sat-stars .s-base{color:#e0dac9}
+.sat-stars .s-fill{color:var(--gold)}
+.sat-meta{display:flex;align-items:center;gap:12px;justify-content:flex-end}
+.sat-val{font-family:'Kanit';font-weight:700;color:var(--forest-900);font-size:16px}
+.sat-pct{font-size:13px;color:var(--muted);min-width:42px;text-align:right}
+.sat-badge{font-family:'Kanit';font-size:12px;font-weight:500;padding:4px 12px;border-radius:14px;white-space:nowrap}
+.sat-badge.l5{background:#EAF3DE;color:#3B6D11}
+.sat-badge.l4{background:#E1F5EE;color:#0F6E56}
+.sat-badge.l3{background:var(--gold-soft);color:#8a6516}
+.sat-badge.l2{background:#FAECE7;color:#a4502a}
+.sat-badge.l1{background:#fbe7e6;color:#b3261e}
+@media(max-width:600px){.sat-row{grid-template-columns:1fr;gap:8px}.sat-stars{order:-1}.sat-meta{justify-content:flex-start}}
+
+/* exec tools */
+.exec-tools{display:flex;gap:10px;flex-wrap:wrap}
+.tool-btn{font-family:'Kanit';font-size:13.5px;font-weight:500;padding:9px 16px;border-radius:10px;cursor:pointer;
+  border:1.5px solid var(--leaf);background:#fff;color:var(--forest-700);display:inline-flex;align-items:center;gap:6px;transition:.18s}
+.tool-btn:hover{background:var(--leaf-soft)}
+.tool-btn.dark{background:var(--forest-800);color:#fff;border-color:var(--forest-800)}
+.tool-btn.dark:hover{background:var(--forest-900)}
+.tool-btn.present{background:var(--gold);color:#231a00;border-color:var(--gold)}
+.tool-btn.present:hover{background:var(--gold-bright)}
+
+/* aspect analysis (drill) — full width, labels never wrap */
+.aspect-box{grid-column:1/-1;margin-top:20px;padding-top:18px;border-top:1px dashed var(--line)}
+.aspect-box>h4{font-family:'Kanit';font-size:14.5px;font-weight:500;color:var(--forest-900);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.aspect-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:start}
+.asp{margin-bottom:13px}
+.asp-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.asp-top .a-lab{font-size:13.5px;color:var(--ink);font-weight:500}
+.asp-top .a-warn{font-size:10.5px;color:#fff;background:var(--coral);font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;font-family:'Kanit'}
+.asp-top .a-val{margin-left:auto;font-family:'Kanit';font-weight:700;color:var(--forest-900);font-size:14.5px}
+.a-track{height:10px;background:var(--cream);border-radius:8px;overflow:hidden}
+.a-bar{height:100%;border-radius:8px;width:0;transition:width 1s cubic-bezier(.2,.7,.3,1)}
+.cmt-col{margin-bottom:14px}
+.cmt-col h5{font-family:'Kanit';font-size:13px;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.cmt-learn h5{color:var(--leaf)} .cmt-improve h5{color:var(--coral)}
+.cmt-box{max-height:178px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:5px}
+.cmt-box::-webkit-scrollbar{width:6px}.cmt-box::-webkit-scrollbar-thumb{background:#d8d2c2;border-radius:6px}
+.cmt{font-size:12.8px;color:#4a4d3c;padding:8px 11px;border-radius:8px;line-height:1.5}
+.cmt-learn .cmt{background:var(--leaf-soft);border-left:3px solid var(--leaf)}
+.cmt-improve .cmt{background:#fbf2ee;border-left:3px solid var(--coral)}
+.cmt-empty{font-size:12.5px;color:var(--muted);padding:4px 0}
+.asp-empty{font-size:13px;color:var(--muted);padding:6px 0}
+
+/* chart header with month-focus slicer */
+.chart-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.chart-head h4{margin:0}
+
+/* context bar (ปีงบประมาณ) — เห็นได้ทั้งสองมุมมอง */
+.ctxbar{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 auto 22px;
+  background:var(--paper);border:1px solid var(--line);border-radius:30px;padding:9px 20px;max-width:max-content;box-shadow:var(--sh-sm)}
+.ctxbar .ctx-lab{font-family:'Kanit';font-size:13px;font-weight:500;color:var(--forest-800)}
+.ctxbar select{font-family:'Kanit';font-size:13.5px;font-weight:600;color:var(--forest-900);border:1.5px solid var(--leaf);
+  border-radius:9px;padding:5px 12px;background:var(--leaf-soft);cursor:pointer}
+.ctxbar .ctx-note{font-size:12px;color:var(--muted)}
+
+/* recent activity */
+.activity{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh-sm);margin-bottom:18px}
+.activity h3{font-family:'Kanit';font-size:15px;font-weight:500;color:var(--forest-900);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.act-row{display:flex;align-items:center;gap:10px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+.act-row:last-child{border-bottom:none}
+.act-row .act-time{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:12.5px}
+.act-row .act-name{color:var(--forest-900);font-weight:500}
+
+@media(max-width:680px){.aspect-grid{grid-template-columns:1fr;gap:6px}}
+@media print{
+  .govbar,.hero,.toggle-wrap,.ctxbar,#viewPublic,footer.site,.disclaimer,.exec-tools{display:none!important}
+  body{background:#fff}
+  .chart-box,.sat-box,.kpi-card,.drill,.table-box,.activity{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
+  .sec-head h2{color:#000}
+}
+
+/* ===== Drill-down per-center block ===== */
+.drill{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;box-shadow:var(--sh-sm);margin-bottom:18px}
+.drill-top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.drill-top .dt-ico{font-size:20px}
+.drill-top h3{font-family:'Kanit';font-size:17px;font-weight:600;color:var(--forest-900)}
+.drill-top .dt-sub{font-size:13px;color:var(--muted)}
+.drill-slicers{display:flex;gap:11px;flex-wrap:wrap;align-items:flex-end;padding:14px 16px;background:var(--cream);
+  border:1px solid var(--line-soft);border-radius:var(--r-sm);margin-bottom:20px}
+.drill-slicers .fg select,.drill-slicers .fg input{min-width:155px;background:#fff}
+.drill-slicers .fg.grow{flex:1;min-width:180px}
+.drill-slicers .fg.grow input{width:100%;min-width:0}
+.dc-select select{font-family:'Kanit';font-weight:500;color:var(--forest-900)}
+
+.drill-detail{display:grid;grid-template-columns:.85fr 1.15fr;gap:22px;align-items:start}
+.dd-left .dd-name{font-family:'Kanit';font-size:20px;font-weight:600;color:var(--forest-900);line-height:1.25}
+.dd-ribbon{display:inline-flex;align-items:center;gap:6px;color:#fff;font-family:'Kanit';font-size:12.5px;font-weight:500;
+  padding:4px 13px;border-radius:16px;margin:9px 0}
+.dd-loc{font-size:13px;color:var(--muted);margin-bottom:10px}
+.dd-quote{font-size:13.5px;color:#4a4d3c;line-height:1.65;border-left:3px solid var(--gold);padding:4px 0 4px 13px;
+  background:linear-gradient(90deg,var(--gold-soft),transparent);border-radius:0 6px 6px 0;margin-bottom:16px}
+.dd-kpis{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.dd-kpi{background:var(--cream);border:1px solid var(--line-soft);border-radius:var(--r-sm);padding:13px 15px}
+.dd-kpi .k-lab{font-size:12px;color:var(--muted);font-weight:600;font-family:'Kanit';display:flex;align-items:center;gap:6px}
+.dd-kpi .k-val{font-family:'Kanit';font-size:23px;font-weight:700;color:var(--forest-900);line-height:1;margin-top:5px}
+.dd-kpi .k-val small{font-size:13px;font-weight:400;color:var(--muted)}
+.dd-kpi.gold{background:var(--gold-soft);border-color:#ecd9a8}
+.dd-stars{color:var(--gold);font-size:14px;letter-spacing:1px}
+.dd-right h4{font-family:'Kanit';font-size:14px;font-weight:500;color:var(--muted);margin-bottom:10px}
+.dd-right canvas{max-height:280px}
+@media(max-width:760px){.drill-detail{grid-template-columns:1fr}}
+
+footer.site{background:var(--teal);color:#fff;border-radius:var(--r) var(--r) 0 0;margin-top:46px;overflow:hidden;position:relative}
+footer.site::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 90% 10%,rgba(255,255,255,.08),transparent 40%)}
+.foot-main{position:relative;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:28px;padding:36px 38px}
+.foot-org{display:flex;gap:15px;align-items:flex-start}
+.foot-org .fseal{width:50px;height:50px;border-radius:13px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.foot-org h4{font-family:'Kanit';font-size:18px;font-weight:600;line-height:1.25;margin-bottom:8px}
+.foot-org p{font-size:13.5px;opacity:.92;line-height:1.6}
+.foot-col h5{font-family:'Kanit';font-size:14.5px;font-weight:500;margin-bottom:13px;border-bottom:1px solid rgba(255,255,255,.28);padding-bottom:8px;letter-spacing:.3px}
+.foot-col .row{display:flex;align-items:center;gap:10px;font-size:13.5px;margin-bottom:10px;opacity:.96}
+.foot-col .row .ic{width:18px;text-align:center}
+.foot-col a{color:#fff}
+.foot-bar{position:relative;background:rgba(0,0,0,.16);padding:15px 24px;font-size:12.5px;display:flex;
+  justify-content:center;align-items:center;flex-wrap:wrap;gap:6px 26px;text-align:center}
+.foot-bar .links a{color:#fff;opacity:.92;text-decoration:none;margin:0 9px;border-bottom:1px solid transparent;transition:.2s}
+.foot-bar .links a:hover{border-bottom-color:#fff}
+.disclaimer{text-align:center;color:var(--muted);font-size:12px;padding:16px 22px 22px;line-height:1.6}
+@media(max-width:820px){.chart-row{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .wrap{padding:0 16px}
+  .hero .wrap{padding:34px 16px 32px}
+  .hero h1{font-size:28px}
+  .hero h1 .accent{white-space:normal}
+  .hero-lead{font-size:15px}
+  .toggle button{padding:10px 16px;font-size:13.5px}
+  .sec-head{margin:30px 0 18px}
+  .filterbar{padding:14px;gap:10px}
+  .filterbar .fg{width:100%}
+  .filterbar .fg select,.filterbar .fg input{width:100%;min-width:0}
+  .count-pill{margin-left:0;width:100%;justify-content:center}
+  #map{height:320px}
+  .grid{grid-template-columns:1fr;gap:16px}
+  .kpi-value{font-size:30px}
+  .drill{padding:18px 16px}
+  .drill-slicers{padding:12px;gap:10px}
+  .drill-slicers .fg,.drill-slicers .fg.grow{width:100%;flex:none}
+  .drill-slicers .fg select,.drill-slicers .fg input{width:100%;min-width:0}
+  .govbar .wrap{padding:9px 16px;font-size:11.5px}
+  .foot-bar{padding:14px 16px}
+}
+@media(max-width:420px){
+  .hero-stats{gap:10px}
+  .hstat{padding:15px}
+  .hstat .hs-num{font-size:27px}
+  .toggle-wrap{padding:0 16px}
+  .toggle{width:100%}
+  .toggle button{flex:1;padding:11px 6px;font-size:13px;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<div class="govbar">
+  <div class="wrap">
+    <div class="gb-l"><span class="gb-seal">🏛️</span> สำนักงานสถิติจังหวัดหนองบัวลำภู</div>
+    <div class="gb-r">
+      <a class="gb-link" href="survey.html">⭐ ประเมินความพึงพอใจ</a>
+      <a class="gb-link staff" href="admin.html">🔐 ระบบกรอกข้อมูล</a>
+      <span class="gb-date"><span class="live-dot"></span>ปรับปรุง <span id="govDate"></span></span>
+    </div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="hero-eyebrow reveal d1">🌾 ศูนย์เรียนรู้ประจำอำเภอ • 6 อำเภอ</span>
+    <h1 class="reveal d2">ศูนย์เรียนรู้<span class="accent">ที่มีชีวิต</span><br>ของชาวหนองบัวลำภู</h1>
+    <p class="hero-lead reveal d3">รวมแหล่งเรียนรู้ด้านการเกษตรและปรัชญาเศรษฐกิจพอเพียงทั้งจังหวัดไว้ในที่เดียว — ค้นหาศูนย์ใกล้คุณ ดูว่ามีอะไรน่าสนใจ และวางแผนไปศึกษาดูงานได้ทันที</p>
+    <div class="pillars reveal d4">
+      <span class="pillar"><i>📉</i> ลดรายจ่าย</span>
+      <span class="pillar"><i>📈</i> เพิ่มรายได้</span>
+      <span class="pillar"><i>🌍</i> ขยายโอกาส</span>
+    </div>
+    <div class="hero-stats reveal d5" id="heroStats"></div>
+  </div>
+</section>
+
+<div class="toggle-wrap reveal d6">
+  <div class="toggle">
+    <button id="btnPublic" class="active" onclick="setView('public')"><i>👥</i> สำหรับประชาชน</button>
+    <button id="btnExec" onclick="setView('exec')"><i>📊</i> สำหรับผู้บริหาร</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="ctxbar reveal">
+    <span class="ctx-lab">📅 ปีงบประมาณ</span>
+    <select id="fySel" onchange="fyChange(this.value)"></select>
+    <span class="ctx-lab">เดือน</span>
+    <select id="moSel" onchange="moChange(this.value)"></select>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div id="viewPublic">
+    <div class="sec-head">
+      <div class="sec-tag">Explore · สำรวจ</div>
+      <h2>ค้นหาศูนย์เรียนรู้ที่อยากไป</h2>
+      <p>เลือกอำเภอหรือประเภทที่สนใจ แล้วกดนำทางไปได้เลย — ทุกหมุดบนแผนที่คือศูนย์จริงในพื้นที่</p>
+    </div>
+
+    <div class="filterbar">
+      <div class="fg"><label>อำเภอ</label><select id="fDistrict" onchange="render()"></select></div>
+      <div class="fg"><label>ประเภทศูนย์</label><select id="fType" onchange="render()"></select></div>
+      <div class="fg"><label>ค้นหาชื่อศูนย์</label><input id="fSearch" type="text" placeholder="พิมพ์ชื่อศูนย์..." oninput="render()"></div>
+      <div class="count-pill">📍 <span id="countNum">—</span> ศูนย์</div>
+    </div>
+
+    <div class="map-shell">
+      <div id="map"></div>
+      <div class="legend" id="mapLegend"></div>
+    </div>
+
+    <div class="grid" id="cardGrid"></div>
+  </div>
+
+  <div id="viewExec" class="hide">
+    <div class="sec-head">
+      <div class="sec-tag">Impact · ภาพรวมผลการดำเนินงาน</div>
+      <h2>ผลการขับเคลื่อนศูนย์เรียนรู้ทั้งจังหวัด</h2>
+      <p>สรุปตัวชี้วัดสำคัญของศูนย์เรียนรู้ประจำอำเภอ ประจำปีงบประมาณ พ.ศ. 2569</p>
+      <div class="exec-tools" style="margin-top:14px">
+        <button class="tool-btn" onclick="exportCSV()">📊 ส่งออก CSV (Excel)</button>
+        <button class="tool-btn dark" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
+        <button class="tool-btn present" onclick="openPresent()">🖥️ โหมดนำเสนอ (จอใหญ่)</button>
+      </div>
+    </div>
+
+    <div class="insight-wrap" id="insightWrap"></div>
+
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-ico">🏫</div><div class="kpi-label">ศูนย์เรียนรู้</div><div class="kpi-value" id="kCenters">0<small> ศูนย์</small></div><div class="kpi-note">ครบทั้ง 6 อำเภอ</div></div>
+      <div class="kpi-card c2"><div class="kpi-ico">👥</div><div class="kpi-label">ผู้เข้าเยี่ยมชม</div><div class="kpi-value" id="kVisitors">0</div><div class="kpi-note">คน / ปี</div></div>
+      <div class="kpi-card c3"><div class="kpi-ico">🎓</div><div class="kpi-label">ผู้รับการอบรม</div><div class="kpi-value" id="kTrained">0</div><div class="kpi-note">คน / ปี</div></div>
+      <div class="kpi-card c4"><div class="kpi-ico">💰</div><div class="kpi-label">รายได้รวมของศูนย์</div><div class="kpi-value" id="kIncome">0<small> บ.</small></div><div class="kpi-note">จากการจำหน่าย/แปรรูป</div></div>
+      <div class="kpi-card c5"><div class="kpi-ico">⭐</div><div class="kpi-label">ความพึงพอใจเฉลี่ย</div><div class="kpi-value" id="kSat">0<small>/5</small></div><div class="kpi-note">จากผู้เข้าอบรม</div></div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-box"><h3>👥 ผู้เข้าชม & ผู้รับการอบรม รายอำเภอ</h3><canvas id="chDistrict"></canvas></div>
+      <div class="chart-box"><h3>🗂️ สัดส่วนประเภทศูนย์</h3><canvas id="chType"></canvas></div>
+    </div>
+    <div class="chart-row" style="grid-template-columns:1fr">
+      <div class="chart-box"><h3>💰 งบประมาณที่ได้รับ รายอำเภอ</h3><canvas id="chBudget"></canvas></div>
+    </div>
+    <div class="sat-box">
+      <div class="sat-top"><h3>⭐ ความพึงพอใจ รายศูนย์</h3><div class="sat-overall" id="satOverall"></div></div>
+      <div class="sat-list" id="satList"></div>
+    </div>
+
+    <div class="chart-row" style="grid-template-columns:1fr">
+      <div class="chart-box"><h3>📈 แนวโน้มความพึงพอใจเฉลี่ยรายเดือน (ปีงบ <span id="trendFy"></span>)</h3><canvas id="chTrend"></canvas>
+        <div class="chart-note" id="trendNote"></div></div>
+    </div>
+
+    <div class="compare-box">
+      <div class="cmp-head">
+        <div><span class="dt-ico">🔀</span></div>
+        <div><h3>เปรียบเทียบศูนย์</h3><div class="dt-sub">เลือก 2–3 ศูนย์เพื่อเทียบตัวชี้วัดเคียงข้างกัน</div></div>
+      </div>
+      <div class="cmp-pick" id="cmpPick"></div>
+      <div class="cmp-result" id="cmpResult"></div>
+    </div>
+
+    <div class="drill">
+      <div class="drill-top">
+        <span class="dt-ico">🔎</span>
+        <div>
+          <h3>เจาะลึกความเคลื่อนไหวรายศูนย์</h3>
+          <div class="dt-sub">เลือกศูนย์เพื่อดูสถิติรายเดือน รายได้ และความพึงพอใจ</div>
+        </div>
+      </div>
+      <div class="drill-slicers">
+        <div class="fg"><label>อำเภอ</label><select id="dDistrict"></select></div>
+        <div class="fg"><label>ประเภทศูนย์</label><select id="dType"></select></div>
+        <div class="fg grow"><label>ค้นหาชื่อศูนย์</label><input id="dSearch" type="text" placeholder="พิมพ์ชื่อศูนย์..."></div>
+        <div class="fg grow dc-select"><label>เลือกศูนย์ที่ต้องการดู</label><select id="dCenter"></select></div>
+      </div>
+      <div class="drill-detail" id="drillDetail"></div>
+    </div>
+
+    <div class="table-box">
+      <h3>📋 ตารางสรุปรายศูนย์</h3>
+      <table>
+        <thead><tr><th>ศูนย์เรียนรู้</th><th>อำเภอ</th><th>ประเภท</th>
+          <th class="num">ผู้เข้าชม</th><th class="num">ผู้อบรม</th><th class="num">รายได้ (บ.)</th><th class="num">งบ (บ.)</th><th class="num">พึงพอใจ</th></tr></thead>
+        <tbody id="execTable"></tbody>
+      </table>
+    </div>
+
+    <div class="activity" id="activityBox" style="display:none">
+      <h3>🕓 กิจกรรมล่าสุด (การอัปเดตข้อมูลศูนย์)</h3>
+      <div id="activityList"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site">
+  <div class="foot-bar">
+    <div>© สงวนลิขสิทธิ์ตามพระราชบัญญัติลิขสิทธิ์ โดย สำนักงานสถิติจังหวัดหนองบัวลำภู</div>
+    <div class="links">
+      <a href="https://nongbualamphu.nso.go.th/law_nso/policy-website.html" target="_blank">นโยบายเว็บไซต์</a>
+      <a href="https://nongbualamphu.nso.go.th/law_nso/privacy-policy.html" target="_blank">นโยบายคุ้มครองข้อมูลส่วนบุคคล</a>
+    </div>
+  </div>
+</footer>
+
+<div class="disclaimer">
+  ข้อมูลตัวอย่างจากเอกสารศูนย์เรียนรู้ประจำอำเภอ • พิกัดเป็นค่าโดยประมาณ ควรแทนด้วยพิกัด GPS จริงก่อนเผยแพร่ • รองรับการเชื่อมต่อข้อมูลสดผ่าน Google Sheets
+</div>
+
+<div class="present-overlay" id="presentOverlay">
+  <button class="present-close" onclick="closePresent()">✕ ปิด (Esc)</button>
+  <div class="present-inner" id="presentInner"></div>
+  <div class="present-nav">
+    <button onclick="presentStep(-1)">‹ ก่อนหน้า</button>
+    <span id="presentDots"></span>
+    <button onclick="presentStep(1)">ถัดไป ›</button>
+  </div>
+</div>
+
+<script>
+const CENTERS = [
+  {name:"กลุ่มปลูกผักอินทรีย์บ้านโพธิ์ศรีสำราญ",district:"เมืองหนองบัวลำภู",tambon:"หัวนา",type:"เกษตรอินทรีย์",lat:17.205,lng:102.442,emoji:"🥬",
+   highlight:"โครงการอันเนื่องมาจากพระราชดำริ ปลูกผักอินทรีย์ ใช้พลังงานแสงอาทิตย์สูบน้ำ พื้นที่สาธารณะ 8 ไร่",
+   tags:["ผักอินทรีย์","โซลาร์เซลล์","ลดสารเคมี"],contact:"นางประดับ สมณะ",phone:"081-0568544",
+   visitors:280,trained:240,income:120000,budget:0,satisfaction:4.4,amenities:{parking:true,toilet:true,food:false,stay:false,meeting:false}},
+  {name:"ศูนย์เรียนรู้ป่ารักษ์น้ำ",district:"นาวัง",tambon:"นาเหล่า",type:"ปรัชญาเศรษฐกิจพอเพียง",lat:17.452,lng:102.302,emoji:"🌳",
+   highlight:"โครงการอันเนื่องมาจากพระราชดำริ อ่างเก็บน้ำซำปาคาด 6 ฐานเรียนรู้ ป่าไม้ ปศุสัตว์ สัตว์น้ำ งานคนเอาถ่าน",
+   tags:["6 ฐานเรียนรู้","ป่ารักษ์น้ำ","คนเอาถ่าน"],contact:"นางสาวพัชรินทร์ ศรีด้วง",phone:"065-3219730",
+   visitors:420,trained:100,income:80000,budget:200000,satisfaction:4.6,amenities:{parking:true,toilet:true,food:true,stay:false,meeting:true}},
+  {name:"ศูนย์ ศพก. อำเภอสุวรรณคูหา",district:"สุวรรณคูหา",tambon:"ดงมะไฟ",type:"เกษตรผสมผสาน",lat:17.553,lng:102.183,emoji:"🌾",
+   highlight:"ศูนย์เรียนรู้การเพิ่มประสิทธิภาพการผลิตสินค้าเกษตร เกษตรผสมผสาน 24 ไร่ BCG Model แปรรูปข้าวยาง",
+   tags:["ศพก.","BCG Model","ข้าวยาง","GAP"],contact:"นายมนวัฒน์ บุณยพรหม",phone:"084-3370262",
+   visitors:650,trained:300,income:180000,budget:12500,satisfaction:4.7,amenities:{parking:true,toilet:true,food:true,stay:false,meeting:true}},
+  {name:"วิสาหกิจชุมชนแปลงใหญ่ข้าวอุทัยสวรรค์",district:"นากลาง",tambon:"อุทัยสวรรค์",type:"วิสาหกิจชุมชน",lat:17.322,lng:102.312,emoji:"🍚",
+   highlight:"แปลงใหญ่ข้าว 615 ไร่ สมาชิก 63 ราย แบรนด์ \"ข้าวบะออนซอน\" แปรรูปข้าว กข6 ออกบูธงานกาชาด",
+   tags:["แปลงใหญ่ข้าว","แบรนด์สินค้า","แปรรูปข้าว"],contact:"นางโสภา มุมวัน",phone:"086-2200224",
+   visitors:380,trained:150,income:450000,budget:0,satisfaction:4.5,amenities:{parking:true,toilet:true,food:false,stay:false,meeting:true}},
+  {name:"ค่ายคนดีศรีบุญเรือง",district:"ศรีบุญเรือง",tambon:"เมืองใหม่",type:"ปรัชญาเศรษฐกิจพอเพียง",lat:16.972,lng:102.272,emoji:"🏕️",
+   highlight:"ฟื้นฟูผู้ติดยาเสพติด ฝึกวิชาชีพคืนคนดีสู่สังคม เกษตรผสมผสานในค่ายตามหลักเศรษฐกิจพอเพียง",
+   tags:["ฝึกอาชีพ","บำบัดฟื้นฟู","เกษตรในค่าย"],contact:"นางสาวศิริพร เนธิบุตร",phone:"063-9013027",
+   visitors:200,trained:90,income:40000,budget:10000,satisfaction:4.2,amenities:{parking:true,toilet:true,food:true,stay:true,meeting:true}},
+  {name:"ศูนย์เรียนรู้โคกหนองโดนโมเดล",district:"โนนสัง",tambon:"กุดดู่",type:"เกษตรผสมผสาน",lat:17.002,lng:102.572,emoji:"⛰️",
+   highlight:"โคก หนอง นา โมเดล จัดการน้ำพื้นที่เกษตร ปลูกพืช 5 ระดับ ฐานคนรักษ์แม่ธรณี ฐานคนรักษ์ป่า",
+   tags:["โคกหนองนา","จัดการน้ำ","ปลูกป่า 3 อย่าง"],contact:"นายเกรียงไกร ไทยอ่อน",phone:"081-9846526",
+   visitors:340,trained:120,income:95000,budget:0,satisfaction:4.5,amenities:{parking:true,toilet:false,food:false,stay:false,meeting:true}}
+];
+
+const TYPE_COLORS={"เกษตรอินทรีย์":"#4a8c3f","เกษตรผสมผสาน":"#159486","วิสาหกิจชุมชน":"#2f6ea3",
+  "ปรัชญาเศรษฐกิจพอเพียง":"#c8962b","ปศุสัตว์":"#a4502a","ประมง":"#378ADD"};
+const fmt=n=>n.toLocaleString('th-TH');
+const AMEN={parking:["🅿️","ที่จอดรถ"],toilet:["🚻","ห้องน้ำ"],food:["🍽️","อาหาร"],stay:["🛏️","ที่พัก"],meeting:["🏛️","ห้องประชุม"]};
+
+/* ===== CONFIG: วางลิงก์ Web app จาก Apps Script เพื่อใช้ข้อมูลสด ===== */
+const CONFIG={GAS_URL:''};   // ว่าง = ใช้ข้อมูลตัวอย่างด้านบน
+function jsonp(url,params,cb){
+  const name='cb_'+Math.random().toString(36).slice(2); params.callback=name;
+  const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
+  window[name]=d=>{cb(d);delete window[name];s.remove();};
+  const s=document.createElement('script'); s.src=url+'?'+qs;
+  s.onerror=()=>{cb(null);delete window[name];s.remove();};
+  document.body.appendChild(s);
+}
+function loadLive(){
+  if(!CONFIG.GAS_URL) return;
+  jsonp(CONFIG.GAS_URL,{action:'getAll'},r=>{
+    if(r&&r.ok&&r.centers&&r.centers.length){
+      CENTERS.length=0; r.centers.forEach(c=>CENTERS.push(c));
+      buildFilters();buildLegend();buildHero();buildDrillSlicers();render();
+      if(!document.getElementById('viewExec').classList.contains('hide'))renderExec();
+      loadActivity();
+    }
+  });
+  jsonp(CONFIG.GAS_URL,{action:'getMonthly'},r=>{
+    if(r&&r.ok&&r.monthly){ MONTHLY=r.monthly;
+      if(!document.getElementById('viewExec').classList.contains('hide'))renderDrill();
+    }
+  });
+}
+let MONTHLY=[];   // ข้อมูลรายเดือนจริงที่ศูนย์กรอก [{centerId,fy,fmonth,visitors,trained,income}]
+/* แปลงข้อมูลรายเดือนจริงของศูนย์ในปีงบ FY -> อาเรย์ลำดับปฏิทิน (ม.ค.-ธ.ค.) ; null ถ้ายังไม่มี */
+function realMonthly(centerId,field){
+  const arr=Array(12).fill(0); let has=false;
+  MONTHLY.forEach(r=>{ if(r.centerId===centerId && r.fy===FY){ arr[FY_IDX[r.fmonth-1]]=r[field]; has=true; } });
+  return has?arr:null;
+}
+
+/* monthly distribution: deterministic, sums to annual total, seasonal peak in cool/harvest season */
+const MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+/* ปีงบประมาณ: ต.ค.(ปีก่อน) – ก.ย. — เรียงเดือนแบบปีงบ */
+const MONTHS_FY=["ต.ค.","พ.ย.","ธ.ค.","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย."];
+const MONTHS_FULL=["ตุลาคม","พฤศจิกายน","ธันวาคม","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน"];
+const FY_IDX=[9,10,11,0,1,2,3,4,5,6,7,8];     // ดัชนีเดือนปฏิทินตามลำดับปีงบ
+const toFY=arr=>FY_IDX.map(i=>arr[i]);
+/* ค่าเริ่มต้น = ปีงบ + เดือนปัจจุบัน (ตามวันนี้) — เปลี่ยนเองได้ภายหลัง */
+function currentFiscal(){
+  const d=new Date(), m=d.getMonth(), be=d.getFullYear()+543;
+  // fmonth ลำดับปีงบ 0..11 (0=ต.ค.); fy = ปีงบประมาณ
+  return (m>=9) ? {fy:be+1, mf:m-9} : {fy:be, mf:m+3};
+}
+let _cf=currentFiscal();
+let FY=Math.min(Math.max(_cf.fy,2569),2575), MFOCUS=_cf.mf;   // ล็อกปีงบให้อยู่ในช่วง 2569–2575
+const yearOf=i=>(i<3?FY-1:FY);                 // ต.ค.–ธ.ค. = ปีก่อน, ม.ค.–ก.ย. = ปีงบ
+
+function buildFySel(){
+  const sel=document.getElementById('fySel');
+  let o=''; for(let y=2569;y<=2575;y++) o+=`<option value="${y}" ${y===FY?'selected':''}>${y}</option>`;
+  sel.innerHTML=o; buildMoSel();
+}
+function buildMoSel(){
+  const sel=document.getElementById('moSel');
+  let o='<option value="-1">ทุกเดือน (ทั้งปีงบ)</option>';
+  for(let i=0;i<12;i++) o+=`<option value="${i}" ${MFOCUS===i?'selected':''}>${MONTHS_FULL[i]}</option>`;
+  sel.innerHTML=o;
+}
+function fyChange(v){ FY=+v; buildMoSel(); if(!document.getElementById('viewExec').classList.contains('hide')){ renderInsights(); renderTrend(); renderDrill(); } }
+function moChange(v){ MFOCUS=+v; if(!document.getElementById('viewExec').classList.contains('hide')){ renderInsights(); renderDrill(); } }
+/* แปลงข้อมูลรายเดือนให้อยู่ลำดับปีงบ + โฟกัสเดือนเดียวถ้าเลือก */
+function fyChartData(mvRaw,mtRaw){
+  let mv=toFY(mvRaw), mt=toFY(mtRaw), labels=MONTHS_FY.slice();
+  if(MFOCUS>=0){ labels=[MONTHS_FY[MFOCUS]]; mv=[mv[MFOCUS]]; mt=[mt[MFOCUS]]; }
+  return {labels,mv,mt};
+}
+function chartTitle(){
+  return MFOCUS>=0
+    ? `ข้อมูลเดือน${MONTHS_FULL[MFOCUS]} ${yearOf(MFOCUS)} — ผู้เข้าชม & ผู้อบรม`
+    : `ความเคลื่อนไหวรายเดือน ปีงบ ${FY} — ผู้เข้าชม & ผู้อบรม`;
+}
+const BASE_W=[12,11,9,7,6,6,7,8,9,10,13,14];
+function distribute(total,offset){
+  const w=BASE_W.map((_,i)=>BASE_W[(i+offset)%12]);
+  const s=w.reduce((a,b)=>a+b,0);
+  const out=w.map(x=>Math.round(total*x/s));
+  out[0]+=total-out.reduce((a,b)=>a+b,0);
+  return out;
+}
+const monthlyVisitors=(c,i)=> realMonthly(c.id,'visitors') || distribute(c.visitors,i*2);
+const monthlyTrained=(c,i)=> realMonthly(c.id,'trained') || distribute(c.trained,i*2+5);
+/* คืนค่าของเดือนที่โฟกัส (ลำดับปีงบ MFOCUS) จากอาเรย์ลำดับปฏิทิน */
+const focusVal=arr=> MFOCUS>=0 ? arr[FY_IDX[MFOCUS]] : null;
+
+/* count-up animation for a lively, digital feel */
+function countUp(el,end,dec){
+  const dur=900,t0=performance.now();
+  (function step(t){
+    const p=Math.min((t-t0)/dur,1),e=1-Math.pow(1-p,3),val=end*e;
+    el.textContent=val.toLocaleString('th-TH',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+    if(p<1)requestAnimationFrame(step);
+  })(t0);
+}
+function animAll(root){root.querySelectorAll('.n').forEach(el=>countUp(el,+el.dataset.v,+(el.dataset.dec||0)));}
+function animNum(el,val,dec,suffix){
+  el.innerHTML='<span class="n" data-v="'+val+'" data-dec="'+dec+'">0</span>'+(suffix?'<small>'+suffix+'</small>':'');
+  countUp(el.querySelector('.n'),val,dec);
+}
+/* Thai 5-level satisfaction interpretation */
+const SAT_LEVELS=[{min:4.5,label:'มากที่สุด',cls:'l5'},{min:3.5,label:'มาก',cls:'l4'},{min:2.5,label:'ปานกลาง',cls:'l3'},{min:1.5,label:'น้อย',cls:'l2'},{min:0,label:'น้อยที่สุด',cls:'l1'}];
+const satLevel=v=>SAT_LEVELS.find(l=>v>=l.min);
+const starRow=v=>`<span class="stars"><span class="s-base">★★★★★</span><span class="s-fill" data-w="${(v/5*100).toFixed(1)}%" style="width:0">★★★★★</span></span>`;
+
+let map,markerLayer;
+function initMap(){
+  map=L.map('map',{scrollWheelZoom:false}).setView([17.20,102.40],9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(map);
+  markerLayer=L.layerGroup().addTo(map);
+}
+function drawMarkers(list){
+  markerLayer.clearLayers();const b=[];
+  list.forEach(c=>{
+    const col=TYPE_COLORS[c.type]||"#4a8c3f";
+    const icon=L.divIcon({className:'',html:
+      `<div style="background:${col};width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+        border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;">
+        <span style="transform:rotate(45deg);font-size:16px">${c.emoji}</span></div>`,iconSize:[34,34],iconAnchor:[17,34]});
+    const m=L.marker([c.lat,c.lng],{icon}).addTo(markerLayer);
+    m.bindPopup(`<div style="font-family:Kanit;font-weight:600;font-size:14px;color:#14331f">${c.name}</div>
+      <div style="color:#7a7a6a;font-size:12.5px;margin:3px 0 7px">อ.${c.district} • ${c.type}</div>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}" target="_blank"
+       style="color:#266038;font-weight:600;font-size:13px;text-decoration:none">📍 นำทางไปที่นี่ →</a>`);
+    b.push([c.lat,c.lng]);
+  });
+  if(b.length)map.fitBounds(b,{padding:[50,50],maxZoom:11});
+}
+
+function buildFilters(){
+  const d=[...new Set(CENTERS.map(c=>c.district))],t=[...new Set(CENTERS.map(c=>c.type))];
+  fDistrict.innerHTML='<option value="">ทุกอำเภอ</option>'+d.map(x=>`<option>${x}</option>`).join('');
+  fType.innerHTML='<option value="">ทุกประเภท</option>'+t.map(x=>`<option>${x}</option>`).join('');
+}
+function buildLegend(){
+  const t=[...new Set(CENTERS.map(c=>c.type))];
+  mapLegend.innerHTML='<div class="lg-title">ประเภทศูนย์เรียนรู้</div>'+t.map(x=>
+    `<div class="lg-item"><span class="dot" style="background:${TYPE_COLORS[x]||'#888'}"></span>${x}</div>`).join('');
+}
+function getFiltered(){
+  const d=fDistrict.value,t=fType.value,s=fSearch.value.trim();
+  return CENTERS.filter(c=>(!d||c.district===d)&&(!t||c.type===t)&&(!s||c.name.includes(s)));
+}
+function render(){
+  const list=getFiltered();
+  countNum.textContent=list.length;
+  drawMarkers(list);
+  cardGrid.innerHTML=list.map((c,i)=>{
+    const col=TYPE_COLORS[c.type]||'#4a8c3f';
+    const gid=CENTERS.indexOf(c);
+    const amen=Object.keys(AMEN).map(k=>`<span class="${c.amenities[k]?'on':''}" title="${AMEN[k][1]}">${AMEN[k][0]}</span>`).join('');
+    return `<div class="card" style="animation:rise .5s ${i*.05}s both">
+      <div class="card-photo" style="background:linear-gradient(135deg,${col}22,${col}0d)">
+        <span class="idx">${String(i+1).padStart(2,'0')}</span>
+        <span class="bigmoji">${c.emoji}</span>
+        <span class="ribbon" style="background:${col}">${c.type}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${c.name}</div>
+        <div class="card-loc"><i>📍</i> ต.${c.tambon} · อ.${c.district}</div>
+        <div class="quote">${c.highlight}</div>
+        <div class="tags">${c.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="meta">
+          <div class="m"><div class="mv">${fmt(c.visitors)}</div><div class="ml">ผู้เข้าชม/ปี</div></div>
+          <div class="m"><div class="mv">${c.satisfaction}<small>/5</small></div><div class="ml">ความพึงพอใจ</div></div>
+          <div class="m"><div class="mv">${c.trained}</div><div class="ml">ผู้อบรม/ปี</div></div>
+        </div>
+        <div class="amen">${amen}</div>
+        <div class="contact">☎️ ${c.contact} · ${c.phone}</div>
+        <div class="card-foot">
+          <a class="btn btn-go" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}">🧭 นำทาง</a>
+          <a class="btn btn-info" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}">🗺️ ดูแผนที่</a>
+        </div>
+        <a class="btn btn-detail" href="detail.html?id=${gid}">📖 ดูรายละเอียดศูนย์</a>
+      </div></div>`;
+  }).join('');
+}
+
+function buildHero(){
+  const v=CENTERS.reduce((a,c)=>a+c.visitors,0);
+  const types=new Set(CENTERS.map(c=>c.type)).size;
+  heroStats.innerHTML=`
+    <div class="hstat"><div class="hs-ico">🗺️</div><div class="hs-num"><span class="n" data-v="6">0</span></div><div class="hs-lab">อำเภอ ครบทุกพื้นที่</div></div>
+    <div class="hstat"><div class="hs-ico">🏫</div><div class="hs-num"><span class="n" data-v="${CENTERS.length}">0</span></div><div class="hs-lab">ศูนย์เรียนรู้</div></div>
+    <div class="hstat"><div class="hs-ico">👥</div><div class="hs-num"><span class="n" data-v="${v}">0</span><small> คน</small></div><div class="hs-lab">ผู้เยี่ยมชม/ปี</div></div>
+    <div class="hstat"><div class="hs-ico">🎯</div><div class="hs-num"><span class="n" data-v="${types}">0</span></div><div class="hs-lab">ประเภทองค์ความรู้</div></div>`;
+  animAll(heroStats);
+}
+
+let charts={};
+function renderExec(){
+  const v=CENTERS.reduce((a,c)=>a+c.visitors,0),t=CENTERS.reduce((a,c)=>a+c.trained,0);
+  const inc=CENTERS.reduce((a,c)=>a+c.income,0),s=CENTERS.reduce((a,c)=>a+c.satisfaction,0)/CENTERS.length;
+  animNum(kCenters,CENTERS.length,0,' ศูนย์');
+  animNum(kVisitors,v,0,'');
+  animNum(kTrained,t,0,'');
+  animNum(kIncome,inc,0,' บ.');
+  animNum(kSat,s,1,'/5');
+
+  Object.values(charts).forEach(c=>c&&c.destroy());
+  Chart.defaults.font.family="'Sarabun',sans-serif";Chart.defaults.font.size=12.5;Chart.defaults.color="#7a7a6a";
+  const labels=CENTERS.map(c=>"อ."+c.district);
+  const grid={color:"#efebdf"};
+
+  charts.d=new Chart(chDistrict,{type:'bar',data:{labels,datasets:[
+    {label:'ผู้เข้าชม',data:CENTERS.map(c=>c.visitors),backgroundColor:'#4a8c3f',borderRadius:6,maxBarThickness:34},
+    {label:'ผู้รับการอบรม',data:CENTERS.map(c=>c.trained),backgroundColor:'#c8962b',borderRadius:6,maxBarThickness:34}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{family:'Kanit'},padding:14,usePointStyle:true}}},
+      scales:{y:{beginAtZero:true,grid},x:{grid:{display:false}}}}});
+
+  const tc={};CENTERS.forEach(c=>tc[c.type]=(tc[c.type]||0)+1);
+  charts.t=new Chart(chType,{type:'doughnut',data:{labels:Object.keys(tc),datasets:[{data:Object.values(tc),
+    backgroundColor:Object.keys(tc).map(x=>TYPE_COLORS[x]||'#888'),borderWidth:3,borderColor:'#fffdf7'}]},
+    options:{responsive:true,cutout:'58%',plugins:{legend:{position:'bottom',labels:{font:{family:'Kanit'},padding:11,usePointStyle:true,boxWidth:8}}}}});
+
+  charts.b=new Chart(chBudget,{type:'bar',data:{labels,datasets:[{label:'งบประมาณ (บาท)',
+    data:CENTERS.map(c=>c.budget),backgroundColor:'#2f6ea3',borderRadius:6,maxBarThickness:26}]},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid},y:{grid:{display:false}}}}});
+
+  renderSatPanel();
+  renderInsights();
+  renderTrend();
+  renderCompare();
+
+  execTable.innerHTML=CENTERS.map(c=>`<tr><td>${c.name}</td><td>อ.${c.district}</td><td>${c.type}</td>
+    <td class="num">${fmt(c.visitors)}</td><td class="num">${fmt(c.trained)}</td><td class="num">${fmt(c.income)}</td>
+    <td class="num">${fmt(c.budget)}</td><td class="num">${c.satisfaction}</td></tr>`).join('');
+}
+
+function renderSatPanel(){
+  const rated=CENTERS.filter(c=>c.surveyCount===undefined||c.surveyCount>0);
+  const base=rated.length?rated:CENTERS;
+  const avg=base.reduce((a,c)=>a+(c.satisfaction||0),0)/base.length;
+  const totalResp=CENTERS.reduce((a,c)=>a+(c.surveyCount||0),0);
+  const lv=satLevel(avg),pct=avg/5*100;
+  const respLine=CONFIG.GAS_URL?`จาก <b>${fmt(totalResp)}</b> รายการประเมินของผู้เข้าชม/ผู้อบรม`:'ประเมินโดยผู้เข้าชมและผู้อบรม';
+  satOverall.innerHTML=`
+    <div class="so-left">
+      <div class="so-num"><span class="n" data-v="${avg.toFixed(2)}" data-dec="2">0</span><small>/5</small></div>
+      ${starRow(avg)}
+    </div>
+    <div class="so-right">
+      <div class="so-pct">เฉลี่ยรวม ร้อยละ <b><span class="n" data-v="${pct.toFixed(1)}" data-dec="1">0</span></b></div>
+      <span class="sat-badge ${lv.cls}">อยู่ในระดับ ${lv.label}</span>
+    </div>
+    <div class="so-right" style="margin-left:auto;align-items:flex-end"><div class="so-pct">${respLine}</div></div>`;
+  satList.innerHTML=CENTERS.map(c=>{const l=satLevel(c.satisfaction||0);
+    const cnt=(c.surveyCount!==undefined)?`<span class="sat-pct">${c.surveyCount} ประเมิน</span>`:'';
+    if(c.surveyCount===0) return `<div class="sat-row"><div class="sat-name">${c.name}</div>
+      <div class="sat-stars" style="color:var(--muted);font-size:13px">ยังไม่มีการประเมิน</div>
+      <div class="sat-meta"><span class="sat-pct">รอผู้เข้าชมให้คะแนน</span></div></div>`;
+    return `<div class="sat-row">
+    <div class="sat-name">${c.name}</div>
+    <div class="sat-stars">${starRow(c.satisfaction)}</div>
+    <div class="sat-meta"><span class="sat-val">${(c.satisfaction||0).toFixed(1)}</span><span class="sat-pct">${((c.satisfaction||0)/5*100).toFixed(0)}%</span>${cnt}<span class="sat-badge ${l.cls}">${l.label}</span></div>
+  </div>`;}).join('');
+  animAll(satOverall);
+  setTimeout(()=>document.querySelectorAll('.sat-box .s-fill').forEach(f=>f.style.width=f.dataset.w),80);
+}
+
+/* ===================== Drill-down ===================== */
+let drillChart=null,drillMatches=[];
+function buildDrillSlicers(){
+  const d=[...new Set(CENTERS.map(c=>c.district))],t=[...new Set(CENTERS.map(c=>c.type))];
+  dDistrict.innerHTML='<option value="">ทุกอำเภอ</option>'+d.map(x=>`<option>${x}</option>`).join('');
+  dType.innerHTML='<option value="">ทุกประเภท</option>'+t.map(x=>`<option>${x}</option>`).join('');
+  dDistrict.onchange=dType.onchange=refreshDrillOptions;
+  dSearch.oninput=refreshDrillOptions;
+  dCenter.onchange=renderDrill;
+  refreshDrillOptions();
+}
+function refreshDrillOptions(){
+  const d=dDistrict.value,t=dType.value,s=dSearch.value.trim();
+  drillMatches=CENTERS.map((c,i)=>({c,i})).filter(o=>
+    (!d||o.c.district===d)&&(!t||o.c.type===t)&&(!s||o.c.name.includes(s)));
+  if(drillMatches.length){
+    dCenter.disabled=false;
+    dCenter.innerHTML='<option value="all">📊 ภาพรวม ('+drillMatches.length+' ศูนย์)</option>'+
+      drillMatches.map(o=>`<option value="${o.i}">${o.c.name}</option>`).join('');
+  }else{
+    dCenter.disabled=true;
+    dCenter.innerHTML='<option value="">— ไม่พบศูนย์ที่ตรงเงื่อนไข —</option>';
+  }
+  renderDrill();
+}
+function stars(v){const f=Math.round(v);return '★'.repeat(f)+'☆'.repeat(5-f);}
+
+/* ===== Insight อัตโนมัติ — คำนวณสดตาม slicer ===== */
+function renderInsights(){
+  const wrap=document.getElementById('insightWrap'); if(!wrap) return;
+  const focused=MFOCUS>=0;
+  const periodTxt=focused?('เดือน'+MONTHS_FULL[MFOCUS]+' '+yearOf(MFOCUS)):('ปีงบประมาณ '+FY);
+  // ค่ารวม (ตามเดือนถ้าเลือกเดือน)
+  const visOf=c=>focused?(focusVal(monthlyVisitors(c,c.id))||0):c.visitors;
+  const trOf =c=>focused?(focusVal(monthlyTrained(c,c.id))||0):c.trained;
+  const incOf=c=>{const a=realMonthly(c.id,'income');return focused?(a?focusVal(a):0):c.income;};
+  const totVis=CENTERS.reduce((a,c)=>a+visOf(c),0);
+  const totTr =CENTERS.reduce((a,c)=>a+trOf(c),0);
+  const totInc=CENTERS.reduce((a,c)=>a+incOf(c),0);
+  // ดาวเด่น & ต้องพัฒนา
+  const rated=CENTERS.filter(c=>(c.surveyCount===undefined)||c.surveyCount>0);
+  const base=rated.length?rated:CENTERS;
+  const top=[...base].sort((a,b)=>(b.satisfaction||0)-(a.satisfaction||0))[0];
+  const topInc=[...CENTERS].sort((a,b)=>incOf(b)-incOf(a))[0];
+  const avgSat=base.reduce((a,c)=>a+(c.satisfaction||0),0)/base.length;
+  // ด้านที่ควรพัฒนา (เฉลี่ยทั้งจังหวัดจาก aspects)
+  const aspSum={},aspKeys=Object.keys(ASPECT_LABELS); aspKeys.forEach(k=>aspSum[k]=[]);
+  CENTERS.forEach(c=>{if(c.aspects)aspKeys.forEach(k=>{if(c.aspects[k]>0)aspSum[k].push(c.aspects[k]);});});
+  let weak=null,weakV=99;
+  aspKeys.forEach(k=>{if(aspSum[k].length){const m=aspSum[k].reduce((a,b)=>a+b,0)/aspSum[k].length; if(m<weakV){weakV=m;weak=k;}}});
+  // การมีส่วนร่วม
+  const totResp=CENTERS.reduce((a,c)=>a+(c.surveyCount||0),0);
+  const evaluated=CENTERS.filter(c=>(c.surveyCount||0)>0).length;
+  // เทรนด์เทียบเดือนก่อน (เมื่อเลือกเดือน)
+  let trend='';
+  if(focused && MFOCUS>0){
+    const prevVis=CENTERS.reduce((a,c)=>{const arr=monthlyVisitors(c,c.id);return a+(arr[FY_IDX[MFOCUS-1]]||0);},0);
+    if(prevVis>0){const dp=Math.round((totVis-prevVis)/prevVis*100);
+      trend=`<span class="ins-trend ${dp>0?'up':dp<0?'down':'flat'}">${dp>0?'▲ +':dp<0?'▼ ':''}${dp}% จากเดือนก่อน</span>`;}
+  }
+  const heroText = top
+    ? `ภาพรวม<b> ${periodTxt}</b> — ศูนย์ดาวเด่นคือ <b>${top.name}</b> (พึงพอใจ ${(top.satisfaction||0).toFixed(1)}/5) · ผู้รับบริการรวม <b>${fmt(totVis+totTr)}</b> คน · รายได้รวม <b>${fmt(totInc)}</b> บาท`
+    : `ภาพรวม ${periodTxt}`;
+
+  const cards=[
+    {cls:'gold',ico:'🏆',lab:'ศูนย์ดาวเด่น (พึงพอใจสูงสุด)',main:top?top.name:'—',sub:top?('★ '+(top.satisfaction||0).toFixed(1)+'/5 · อ.'+top.district):'ยังไม่มีผลประเมิน'},
+    {cls:'teal',ico:'💰',lab:'รายได้สูงสุด',main:topInc?topInc.name:'—',sub:topInc?(fmt(incOf(topInc))+' บาท'):''},
+    {cls:'',ico:'👥',lab:'ผู้รับบริการรวม ('+periodTxt+')',main:fmt(totVis+totTr)+' คน',sub:'เข้าชม '+fmt(totVis)+' · อบรม '+fmt(totTr)+ (trend?' ':''),extra:trend},
+    {cls:'warn',ico:'⚠️',lab:'ด้านที่ทั้งจังหวัดควรพัฒนา',main:weak?ASPECT_LABELS[weak]:'—',sub:weak?('คะแนนเฉลี่ย '+weakV.toFixed(1)+'/5 ต่ำสุด'):'รอข้อมูลประเมิน'},
+    {cls:'teal',ico:'💬',lab:'การมีส่วนร่วมประเมิน',main:evaluated+'/'+CENTERS.length+' ศูนย์',sub:fmt(totResp)+' รายการ · '+(CENTERS.length-evaluated)+' ศูนย์รอประเมิน'},
+    {cls:'',ico:'⭐',lab:'ความพึงพอใจเฉลี่ยทั้งจังหวัด',main:(avgSat||0).toFixed(2)+'/5',sub:satLevel(avgSat).label}
+  ];
+  wrap.innerHTML=`
+    <div class="insight-hero">
+      <div class="ih-tag">✨ สรุปอัตโนมัติ · Auto Insight</div>
+      <div class="ih-text">${heroText}</div>
+    </div>
+    <div class="insight-cards">
+      ${cards.map(c=>`<div class="ins-card ${c.cls}">
+        <div class="ic-ico">${c.ico}</div>
+        <div><div class="ic-lab">${c.lab}</div><div class="ic-main">${c.main}</div>
+        <div class="ic-sub">${c.sub}</div>${c.extra||''}</div>
+      </div>`).join('')}
+    </div>`;
+}
+/* ===== กราฟแนวโน้มความพึงพอใจรายเดือน ===== */
+let trendChart=null;
+function renderTrend(){
+  const cv=document.getElementById('chTrend'); if(!cv) return;
+  document.getElementById('trendFy').textContent=FY;
+  const draw=arr=>{
+    const data=toFY(arr);                       // เรียงลำดับปีงบ ต.ค.→ก.ย.
+    const hasData=data.some(x=>x>0);
+    document.getElementById('trendNote').textContent=hasData?'':'ยังไม่มีข้อมูลประเมินในปีงบนี้ — กราฟจะอัปเดตเมื่อมีผู้ประเมิน';
+    if(trendChart)trendChart.destroy();
+    trendChart=new Chart(cv,{type:'line',data:{labels:MONTHS_FY,datasets:[{
+      label:'ความพึงพอใจเฉลี่ย',data:data.map(x=>x||null),
+      borderColor:'#c8962b',backgroundColor:'rgba(200,150,43,.12)',borderWidth:3,
+      pointBackgroundColor:'#266038',pointRadius:5,pointHoverRadius:7,tension:.32,fill:true,spanGaps:true}]},
+      options:{responsive:true,plugins:{legend:{display:false}},
+        scales:{y:{min:0,max:5,ticks:{stepSize:1},grid:{color:'#efebdf'}},x:{grid:{display:false}}}}});
+  };
+  if(CONFIG.GAS_URL){
+    jsonp(CONFIG.GAS_URL,{action:'satTrend',fy:FY},r=>{ draw(r&&r.ok&&r.trend?reFromFY(r.trend):Array(12).fill(0)); });
+  }else{
+    // โหมดสาธิต: จำลองแนวโน้มจากค่าพึงพอใจเฉลี่ย
+    const avg=CENTERS.reduce((a,c)=>a+(c.satisfaction||0),0)/CENTERS.length;
+    draw(reFromFY(MONTHS_FY.map((_,i)=>Math.max(0,Math.min(5,avg+Math.sin(i/2)*0.25)))));
+  }
+}
+/* satTrend คืนค่าลำดับปีงบอยู่แล้ว -> แปลงกลับเป็นลำดับปฏิทินเพื่อให้ toFY ใช้ได้ */
+function reFromFY(fyArr){ const cal=Array(12).fill(0); FY_IDX.forEach((ci,k)=>cal[ci]=fyArr[k]); return cal; }
+
+/* ===== เปรียบเทียบศูนย์ ===== */
+let CMP=[];
+function renderCompare(){
+  const pick=document.getElementById('cmpPick'); if(!pick) return;
+  CMP=CMP.filter(id=>CENTERS[id]);
+  pick.innerHTML=CENTERS.map((c,i)=>{
+    const on=CMP.includes(i), dis=!on&&CMP.length>=3;
+    return `<span class="cmp-chip ${on?'on':''} ${dis?'dis':''}" onclick="toggleCmp(${i})">${c.emoji} ${c.name}</span>`;
+  }).join('');
+  const res=document.getElementById('cmpResult');
+  if(CMP.length<2){ res.innerHTML='<div class="cmp-empty">เลือกอย่างน้อย 2 ศูนย์เพื่อเปรียบเทียบ (สูงสุด 3)</div>'; return; }
+  const sel=CMP.map(i=>CENTERS[i]);
+  const max={vis:Math.max(...sel.map(c=>c.visitors)),tr:Math.max(...sel.map(c=>c.trained)),
+    inc:Math.max(...sel.map(c=>c.income)),sat:Math.max(...sel.map(c=>c.satisfaction||0))};
+  res.innerHTML='<div class="cmp-grid">'+sel.map(c=>{
+    const col=TYPE_COLORS[c.type]||'#266038';
+    const m=(lab,val,unit,best)=>`<div class="cmp-metric"><div class="m-lab">${lab}</div><div class="m-val ${best?'best':''}">${val}<small> ${unit}</small></div></div>`;
+    return `<div class="cmp-card">
+      <div class="cc-head" style="background:${col}"><div class="cc-name">${c.emoji} ${c.name}</div><div class="cc-loc">อ.${c.district} · ${c.type}</div></div>
+      <div class="cmp-metrics">
+        ${m('👥 ผู้เข้าชม/ปี',fmt(c.visitors),'คน',c.visitors===max.vis)}
+        ${m('🎓 ผู้อบรม/ปี',fmt(c.trained),'คน',c.trained===max.tr)}
+        ${m('💰 รายได้/ปี',fmt(c.income),'บ.',c.income===max.inc)}
+        ${m('⭐ พึงพอใจ',(c.satisfaction||0).toFixed(1),'/5',(c.satisfaction||0)===max.sat&&max.sat>0)}
+      </div></div>`;
+  }).join('')+'</div>';
+}
+function toggleCmp(i){
+  const k=CMP.indexOf(i);
+  if(k>=0)CMP.splice(k,1); else { if(CMP.length>=3)return; CMP.push(i); }
+  renderCompare();
+}
+
+/* ===== โหมดนำเสนอจอใหญ่ ===== */
+let P_STEP=0;
+function presentSlides(){
+  const v=CENTERS.reduce((a,c)=>a+c.visitors,0), t=CENTERS.reduce((a,c)=>a+c.trained,0);
+  const inc=CENTERS.reduce((a,c)=>a+c.income,0);
+  const base=CENTERS.filter(c=>(c.surveyCount===undefined)||c.surveyCount>0);
+  const avg=(base.length?base:CENTERS).reduce((a,c)=>a+(c.satisfaction||0),0)/(base.length?base.length:CENTERS.length);
+  const bySat=[...CENTERS].sort((a,b)=>(b.satisfaction||0)-(a.satisfaction||0));
+  const byInc=[...CENTERS].sort((a,b)=>b.income-a.income);
+  const rank=(arr,valFn,unit,maxV)=>arr.slice(0,6).map((c,i)=>`<div class="p-rank">
+      <div class="pr-no">${i+1}</div><div class="pr-name">${c.emoji} ${c.name}</div>
+      <div class="pr-bar"><div class="pr-fill" style="width:${maxV?Math.round(valFn(c)/maxV*100):0}%"></div></div>
+      <div class="pr-val">${valFn(c)===undefined?'':fmt(valFn(c))}${unit}</div></div>`).join('');
+  return [
+    `<div class="p-eyebrow">สำนักงานสถิติจังหวัดหนองบัวลำภู · ปีงบประมาณ ${FY}</div>
+     <div class="p-title">ศูนย์เรียนรู้ที่มีชีวิต<br>จังหวัดหนองบัวลำภู</div>
+     <div class="p-sub">ขับเคลื่อนเศรษฐกิจฐานราก ลดรายจ่าย เพิ่มรายได้ ขยายโอกาส ครอบคลุมทั้ง 6 อำเภอ</div>
+     <div class="p-stats">
+       <div class="p-stat"><div class="ps-num">${CENTERS.length}</div><div class="ps-lab">ศูนย์เรียนรู้</div></div>
+       <div class="p-stat"><div class="ps-num">6</div><div class="ps-lab">อำเภอครอบคลุม</div></div>
+       <div class="p-stat"><div class="ps-num">${fmt(v+t)}</div><div class="ps-lab">ผู้รับบริการรวม (คน)</div></div>
+     </div>`,
+    `<div class="p-eyebrow">ผลกระทบเชิงเศรษฐกิจ · ปีงบ ${FY}</div>
+     <div class="p-title">สร้างผลลัพธ์ที่จับต้องได้</div>
+     <div class="p-stats">
+       <div class="p-stat"><div class="ps-num">${fmt(v)}</div><div class="ps-lab">👥 ผู้เข้าเยี่ยมชม (คน)</div></div>
+       <div class="p-stat"><div class="ps-num">${fmt(t)}</div><div class="ps-lab">🎓 ผู้รับการอบรม (คน)</div></div>
+       <div class="p-stat"><div class="ps-num">${fmt(inc)}</div><div class="ps-lab">💰 รายได้รวม (บาท)</div></div>
+       <div class="p-stat"><div class="ps-num">${avg.toFixed(2)}</div><div class="ps-lab">⭐ พึงพอใจเฉลี่ย /5</div></div>
+     </div>`,
+    `<div class="p-eyebrow">จัดอันดับความพึงพอใจ</div>
+     <div class="p-title">ศูนย์ดาวเด่นของจังหวัด</div>
+     <div class="p-list" style="margin-top:10px">${rank(bySat,c=>+(c.satisfaction||0).toFixed(1),' ★',5)}</div>`,
+    `<div class="p-eyebrow">จัดอันดับรายได้</div>
+     <div class="p-title">ศูนย์ที่สร้างรายได้สูงสุด</div>
+     <div class="p-list" style="margin-top:10px">${rank(byInc,c=>c.income,' บ.',byInc[0]?byInc[0].income:0)}</div>`
+  ];
+}
+function openPresent(){ P_STEP=0; document.getElementById('presentOverlay').classList.add('show'); showPresent(); document.addEventListener('keydown',presentKey); }
+function closePresent(){ document.getElementById('presentOverlay').classList.remove('show'); document.removeEventListener('keydown',presentKey); }
+function presentStep(d){ const n=presentSlides().length; P_STEP=(P_STEP+d+n)%n; showPresent(); }
+function showPresent(){
+  const slides=presentSlides();
+  document.getElementById('presentInner').innerHTML=slides[P_STEP];
+  document.getElementById('presentDots').textContent=slides.map((_,i)=>i===P_STEP?'●':'○').join(' ');
+}
+function presentKey(e){ if(e.key==='Escape')closePresent(); else if(e.key==='ArrowRight')presentStep(1); else if(e.key==='ArrowLeft')presentStep(-1); }
+
+function renderDrill(){
+  const val=dCenter.value;
+  if(val===''){drillDetail.innerHTML='<div style="color:var(--muted);padding:20px 0">ไม่พบศูนย์ที่ตรงกับเงื่อนไข ลองปรับตัวกรอง</div>';
+    if(drillChart){drillChart.destroy();drillChart=null;}return;}
+  if(val==='all'){renderDrillOverview();return;}
+  const idx=parseInt(val,10);
+  const c=CENTERS[idx],col=TYPE_COLORS[c.type]||'#4a8c3f';
+  const mvArr=monthlyVisitors(c,idx),mtArr=monthlyTrained(c,idx);
+  const incArr=realMonthly(c.id,'income');
+  const cd=fyChartData(mvArr,mtArr);
+  const focused=MFOCUS>=0;
+  const per=focused?(' ('+MONTHS_FULL[MFOCUS]+')'):'/ปี';
+  const vVal=focused?focusVal(mvArr):c.visitors;
+  const tVal=focused?focusVal(mtArr):c.trained;
+  const iVal=focused?(incArr?focusVal(incArr):null):c.income;
+  drillDetail.innerHTML=`
+    <div class="dd-left">
+      <div class="dd-name">${c.name}</div>
+      <span class="dd-ribbon" style="background:${col}">${c.emoji} ${c.type}</span>
+      <div class="dd-loc">📍 ต.${c.tambon} · อ.${c.district}</div>
+      <div class="dd-quote">${c.highlight}</div>
+      <div class="dd-kpis">
+        <div class="dd-kpi gold"><div class="k-lab">💰 รายได้รวม${per}</div><div class="k-val">${iVal===null?'—':fmt(iVal)}<small> บ.</small></div></div>
+        <div class="dd-kpi" id="ddSat"><div class="k-lab">⭐ ความพึงพอใจ</div><div class="k-val">${(c.satisfaction||0)}<small>/5</small></div><div class="dd-stars">${stars(c.satisfaction||0)}</div></div>
+        <div class="dd-kpi"><div class="k-lab">👥 ผู้เข้าชม${per}</div><div class="k-val">${fmt(vVal||0)}<small> คน</small></div></div>
+        <div class="dd-kpi"><div class="k-lab">🎓 ผู้อบรม${per}</div><div class="k-val">${fmt(tVal||0)}<small> คน</small></div></div>
+      </div>
+    </div>
+    <div class="dd-right">
+      <div class="chart-head">
+        <h4>${chartTitle()}</h4>
+      </div>
+      <canvas id="drillChart"></canvas>
+    </div>`;
+  if(drillChart)drillChart.destroy();
+  drillChart=new Chart(document.getElementById('drillChart'),{type:'bar',
+    data:{labels:cd.labels,datasets:[
+      {label:'ผู้เข้าชม',data:cd.mv,backgroundColor:col,borderRadius:5,maxBarThickness:MFOCUS>=0?60:18},
+      {label:'ผู้อบรม',data:cd.mt,backgroundColor:'#c8962b',borderRadius:5,maxBarThickness:MFOCUS>=0?60:18}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{family:'Kanit'},padding:12,usePointStyle:true}}},
+      scales:{y:{beginAtZero:true,grid:{color:'#efebdf'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  renderAspects(c);
+}
+
+const ASPECT_LABELS={q_content:'เนื้อหา/สิ่งที่ได้เรียนรู้',q_speaker:'วิทยากร/ผู้ถ่ายทอด',q_place:'สถานที่/สิ่งอำนวยความสะดวก',q_apply:'การนำไปใช้ประโยชน์',q_overall:'ความพึงพอใจโดยรวม'};
+const clamp=v=>Math.max(1,Math.min(5,Math.round(v*10)/10));
+const esc=s=>String(s).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+function deriveAspects(s){return {q_content:clamp(s+.1),q_speaker:clamp(s-.1),q_place:clamp(s-.2),q_apply:clamp(s+.05),q_overall:clamp(s)};}
+function aspectBars(aspects,count,learned,improve){
+  const keys=Object.keys(ASPECT_LABELS);
+  const vals=keys.map(k=>aspects[k]||0);
+  const pos=vals.filter(v=>v>0); const minV=pos.length?Math.min.apply(null,pos):0;
+  const colorOf=v=>v>=4.5?'#3B6D11':v>=3.5?'#159486':v>=2.5?'#c8962b':v>=1.5?'#a4502a':'#b3261e';
+  if(count===0){
+    return `<div class="aspect-box"><h4>⭐ ผลประเมินรายด้าน</h4><div class="asp-empty">ยังไม่มีผลประเมินจากผู้เข้าชม/ผู้อบรม — เชิญชวนสแกน QR เพื่อให้คะแนน</div></div>`;
+  }
+  let bars='';
+  keys.forEach((k,i)=>{const v=vals[i];const low=(v===minV&&v>0);
+    bars+=`<div class="asp"><div class="asp-top"><span class="a-lab">${ASPECT_LABELS[k]}</span>${low?'<span class="a-warn">⚠ ควรพัฒนา</span>':''}<span class="a-val">${v.toFixed(1)}</span></div>
+      <div class="a-track"><div class="a-bar" data-w="${v/5*100}%" style="background:${colorOf(v)}"></div></div></div>`;});
+  const cmtList=(arr,empty)=> (arr&&arr.length)? arr.map(t=>`<div class="cmt">${esc(t)}</div>`).join('') : `<div class="cmt-empty">${empty}</div>`;
+  return `<div class="aspect-box"><h4>⭐ ผลประเมินรายด้าน${count!==undefined?` (จาก ${count} รายการ)`:''}</h4>
+    <div class="aspect-grid">
+      <div class="bars-col">${bars}</div>
+      <div class="cmt-cols">
+        <div class="cmt-col cmt-learn"><h5>💡 สิ่งที่ได้เรียนรู้ / ประทับใจ</h5><div class="cmt-box">${cmtList(learned,'ยังไม่มีความเห็น')}</div></div>
+        <div class="cmt-col cmt-improve"><h5>🔧 สิ่งที่ควรปรับปรุง</h5><div class="cmt-box">${cmtList(improve,'ยังไม่มีความเห็น')}</div></div>
+      </div>
+    </div></div>`;
+}
+function paintBars(){setTimeout(()=>document.querySelectorAll('.aspect-box .a-bar').forEach(b=>b.style.width=b.dataset.w),80);}
+function renderAspects(c){
+  const box=document.getElementById('drillDetail'); if(!box) return;
+  if(CONFIG.GAS_URL){
+    const fmonth=MFOCUS>=0?(MFOCUS+1):0;
+    jsonp(CONFIG.GAS_URL,{action:'surveyStats',id:c.id,fy:FY,fmonth:fmonth},r=>{
+      if(r&&r.ok){const s=r.stats;
+        box.insertAdjacentHTML('beforeend',aspectBars(s.aspects,s.count,s.learned,s.improve));paintBars();
+        const sat=document.getElementById('ddSat');   // อัปเดตดาวให้ตรงช่วงเวลาที่เลือก
+        if(sat){ sat.querySelector('.k-val').innerHTML=`${(s.overall||0).toFixed(1)}<small>/5</small>`;
+                 sat.querySelector('.dd-stars').textContent=stars(s.overall||0); }
+      }
+    });
+  }else{
+    box.insertAdjacentHTML('beforeend',aspectBars(deriveAspects(c.satisfaction||4),undefined,[],[]));paintBars();
+  }
+}
+
+function renderDrillOverview(){
+  const list=drillMatches;
+  const income=list.reduce((a,o)=>a+o.c.income,0);
+  const vis=list.reduce((a,o)=>a+o.c.visitors,0);
+  const tr=list.reduce((a,o)=>a+o.c.trained,0);
+  const sat=list.reduce((a,o)=>a+o.c.satisfaction,0)/list.length;
+  const mv=Array(12).fill(0),mt=Array(12).fill(0);
+  list.forEach(o=>{const v=monthlyVisitors(o.c,o.i),t=monthlyTrained(o.c,o.i);for(let i=0;i<12;i++){mv[i]+=v[i];mt[i]+=t[i];}});
+  const top=list.slice().sort((a,b)=>b.c.visitors-a.c.visitors)[0].c;
+  const d=dDistrict.value,t=dType.value;
+  const scope=(d?('อ.'+d):'ทุกอำเภอ')+(t?(' · '+t):'');
+  drillDetail.innerHTML=`
+    <div class="dd-left">
+      <div class="dd-name">ภาพรวม ${list.length} ศูนย์เรียนรู้</div>
+      <span class="dd-ribbon" style="background:var(--forest-700)">📊 ${scope}</span>
+      <div class="dd-quote">ศูนย์ที่มีผู้เข้าชมสูงสุดคือ <b>${top.name}</b> (${fmt(top.visitors)} คน/ปี) — เลือกศูนย์รายแห่งจากเมนูด้านบนเพื่อดูรายละเอียดเชิงลึก</div>
+      <div class="dd-kpis">
+        <div class="dd-kpi gold"><div class="k-lab">💰 รายได้รวม</div><div class="k-val">${fmt(income)}<small> บ.</small></div></div>
+        <div class="dd-kpi"><div class="k-lab">⭐ พึงพอใจเฉลี่ย</div><div class="k-val">${sat.toFixed(1)}<small>/5</small></div><div class="dd-stars">${stars(sat)}</div></div>
+        <div class="dd-kpi"><div class="k-lab">👥 ผู้เข้าชมรวม</div><div class="k-val">${fmt(vis)}<small> คน</small></div></div>
+        <div class="dd-kpi"><div class="k-lab">🎓 ผู้อบรมรวม</div><div class="k-val">${fmt(tr)}<small> คน</small></div></div>
+      </div>
+    </div>
+    <div class="dd-right">
+      <div class="chart-head">
+        <h4>${chartTitle().replace('รายเดือน','รายเดือนรวมทุกศูนย์').replace('ข้อมูลเดือน','ข้อมูลรวมทุกศูนย์ เดือน')}</h4>
+      </div>
+      <canvas id="drillChart"></canvas>
+    </div>`;
+  if(drillChart)drillChart.destroy();
+  const cd=fyChartData(mv,mt);
+  drillChart=new Chart(document.getElementById('drillChart'),{type:'bar',
+    data:{labels:cd.labels,datasets:[
+      {label:'ผู้เข้าชม',data:cd.mv,backgroundColor:'#266038',borderRadius:5,maxBarThickness:MFOCUS>=0?60:18},
+      {label:'ผู้อบรม',data:cd.mt,backgroundColor:'#c8962b',borderRadius:5,maxBarThickness:MFOCUS>=0?60:18}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{family:'Kanit'},padding:12,usePointStyle:true}}},
+      scales:{y:{beginAtZero:true,grid:{color:'#efebdf'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+}
+
+function exportCSV(){
+  const head=['ศูนย์','อำเภอ','ประเภท','ผู้เข้าชม/ปี','ผู้อบรม/ปี','รายได้รวม','งบประมาณ','ความพึงพอใจ','จำนวนประเมิน'];
+  const rows=CENTERS.map(c=>[c.name,c.district,c.type,c.visitors,c.trained,c.income,c.budget,(c.satisfaction||0).toFixed(1),(c.surveyCount!==undefined?c.surveyCount:'-')]);
+  const csv='\ufeff'+[head].concat(rows).map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='สรุปศูนย์เรียนรู้_หนองบัวลำภู.csv';a.click();
+}
+function loadActivity(){
+  if(!CONFIG.GAS_URL) return;
+  jsonp(CONFIG.GAS_URL,{action:'recentLog'},r=>{
+    if(r&&r.ok&&r.log&&r.log.length){
+      document.getElementById('activityBox').style.display='block';
+      document.getElementById('activityList').innerHTML=r.log.map(l=>
+        `<div class="act-row"><span class="act-time">${l.time}</span><span>•</span><span class="act-name">${l.name}</span><span style="color:var(--muted)">${l.action}</span></div>`).join('');
+    }
+  });
+}
+
+function setView(v){
+  const pub=v==='public';
+  viewPublic.classList.toggle('hide',!pub);
+  viewExec.classList.toggle('hide',pub);
+  btnPublic.classList.toggle('active',pub);
+  btnExec.classList.toggle('active',!pub);
+  if(pub)setTimeout(()=>map.invalidateSize(),120);else{renderExec();setTimeout(renderDrill,60);loadActivity();}
+}
+
+const today=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+govDate.textContent=today;
+initMap();buildFySel();buildFilters();buildLegend();buildHero();buildDrillSlicers();render();loadLive();
+</script>
+</body>
+</html>
