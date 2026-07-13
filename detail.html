@@ -505,6 +505,19 @@ function render(c){
     </div>
     <div class="share-grid" style="margin-top:16px">
       <div class="share-card">
+        <h3>🤝 ร่วมสนับสนุนศูนย์นี้</h3>
+        <p>สำหรับหน่วยงาน/ภาคีที่มอบปัจจัยหรือสิ่งของ — สแกน QR เพื่อลงทะเบียนการสนับสนุน</p>
+        <div class="share-btns">
+          <a class="share-btn primary" style="background:var(--gold);border-color:var(--gold)" href="support.html?id=${id}">🎁 ลงทะเบียนสนับสนุน</a>
+        </div>
+      </div>
+      <div class="qr-card">
+        <div id="qrSupport"></div>
+        <span>สแกนเพื่อลงทะเบียน</span>
+      </div>
+    </div>
+    <div class="share-grid" style="margin-top:16px">
+      <div class="share-card">
         <h3>🔗 แชร์ศูนย์นี้</h3>
         <p>ส่งหน้านี้ให้เพื่อนหรือผู้สนใจ เพื่อชวนมาศึกษาดูงาน</p>
         <div class="share-btns">
@@ -545,6 +558,8 @@ function render(c){
   try{
     var surveyURL=new URL('survey.html?id='+id, location.href).href;
     new QRCode(document.getElementById('qrSurvey'),{text:surveyURL,width:118,height:118,colorDark:'#1c4a2c',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    var supportURL=new URL('support.html?id='+id, location.href).href;
+    new QRCode(document.getElementById('qrSupport'),{text:supportURL,width:118,height:118,colorDark:'#8a6a15',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
     new QRCode(document.getElementById('qrbox'),{text:location.href,width:118,height:118,colorDark:'#14331f',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
   }catch(e){}
 }
