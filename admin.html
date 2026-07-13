@@ -125,8 +125,10 @@ textarea{resize:vertical;min-height:64px}
         <input id="f_upload" type="file" accept="image/*" multiple onchange="uploadImages(this)">
         <div class="hint" id="upStatus">เลือกรูปเพื่ออัปโหลด ระบบจะวางลิงก์ให้อัตโนมัติ (รูปแรกเป็นรูปหลัก)</div>
         <label>ลิงก์รูปภาพ (คั่นแต่ละรูปด้วย | )</label>
-        <textarea id="f_images" placeholder="https://drive.google.com/uc?id=XXXX | https://..."></textarea>
-        <div class="hint">หรือวางลิงก์เองก็ได้: อัปโหลดรูปขึ้น Google Drive → แชร์แบบ "ทุกคนที่มีลิงก์" → วางที่นี่</div>
+        <textarea id="f_images" placeholder="images/center0-1.jpg | https://drive.google.com/file/d/XXXX/view"></textarea>
+        <div class="hint"><b>วิธีที่แนะนำ (เสถียรที่สุด):</b> อัปรูปไว้ในโฟลเดอร์ <code>images/</code> ของ GitHub repo แล้วใส่ชื่อไฟล์ เช่น <code>images/center0-1.jpg</code><br>
+        <b>หรือใช้ Google Drive:</b> แชร์รูปแบบ "ทุกคนที่มีลิงก์" → คัดลอกลิงก์มาวางได้เลย (ระบบแปลงให้อัตโนมัติ)<br>
+        รูปแรก = รูปหลัก · ใส่ได้สูงสุด 4 รูป</div>
         <label>ลิงก์วิดีโอ YouTube (แบบฝัง)</label>
         <input id="f_video" placeholder="https://www.youtube.com/embed/XXXX">
         <div class="hint">นำรหัสหลัง watch?v= มาต่อท้าย .../embed/ เช่น youtube.com/embed/abc123</div>

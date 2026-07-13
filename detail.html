@@ -362,15 +362,33 @@ const DETAILS=[
 ];
 const AMEN={parking:["🅿️","ที่จอดรถ"],toilet:["🚻","ห้องน้ำ"],food:["🍽️","อาหาร/ร้านอาหาร"],stay:["🛏️","ที่พัก/โฮมสเตย์"],meeting:["🏛️","ห้องประชุม/ศาลา"]};
 
+/* ===== แปลงลิงก์รูปให้ใช้งานได้จริง (รองรับทุกแบบ) ===== */
+function imgURL(u){
+  if(!u) return '';
+  u=String(u).trim();
+  // ลิงก์ Google Drive ทุกรูปแบบ -> ใช้ thumbnail endpoint (เสถียรกว่า uc?id= มาก)
+  const m = u.match(/drive\.google\.com\/file\/d\/([-\w]{20,})/)     // .../file/d/ID/view
+         || u.match(/[?&]id=([-\w]{20,})/)                            // ...uc?id=ID
+         || u.match(/drive\.google\.com\/open\?id=([-\w]{20,})/);
+  if(m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1600`;
+  return u;   // ลิงก์อื่น (GitHub, Imgur, ฯลฯ) ใช้ตรงๆ
+}
+/* ถ้าโหลดรูปไม่ขึ้น -> แสดง placeholder แทน (ไม่ปล่อยกรอบว่าง) */
+function imgTag(u,cls){
+  const src=imgURL(u);
+  return `<img src="${src}" alt="" ${cls?`class="${cls}"`:''} loading="lazy"
+    onerror="this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div class=\\'ph\\'><span class=\\'ph-ico\\'>⚠️</span><span class=\\'ph-tx\\'>รูปโหลดไม่ได้</span></div>')">`;
+}
+
 /* ===== Gallery (placeholders when no image) ===== */
 function gallery(imgs){
   const phMain=`<div class="ph"><span class="ph-ico">🖼️</span><span class="ph-tx">โปรดนำภาพเข้า</span></div>`;
   const phThumb=`<div class="ph"><span class="ph-ico">📷</span></div>`;
-  const main=imgs[0]?`<img src="${imgs[0]}" alt="">`:phMain;
+  const main=imgs[0]?imgTag(imgs[0]):phMain;
   let thumbs='';
   for(let i=0;i<4;i++){
     const im=imgs[i];
-    thumbs+=`<div class="g-thumb ${i===0?'active':''}" data-i="${i}">${im?`<img src="${im}" alt="">`:phThumb}</div>`;
+    thumbs+=`<div class="g-thumb ${i===0?'active':''}" data-i="${i}">${im?imgTag(im):phThumb}</div>`;
   }
   return `<div class="gallery">
     <div class="g-main" id="gMain">${main}</div>
@@ -511,7 +529,7 @@ function render(c){
   if(imgs.length){
     document.querySelectorAll('.g-thumb').forEach(th=>th.onclick=()=>{
       const i=+th.dataset.i; if(!imgs[i])return;
-      document.getElementById('gMain').innerHTML=`<img src="${imgs[i]}" alt="">`;
+      document.getElementById('gMain').innerHTML=imgTag(imgs[i]);
       document.querySelectorAll('.g-thumb').forEach(x=>x.classList.remove('active'));
       th.classList.add('active');
     });
