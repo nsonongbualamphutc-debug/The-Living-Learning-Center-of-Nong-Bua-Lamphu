@@ -89,12 +89,11 @@ textarea{resize:vertical;min-height:64px}
     <label>หมวดการสนับสนุน</label>
     <div class="chips" id="catChips"></div>
 
-    <div class="row3">
-      <div><label>จำนวน</label><input id="qty" inputmode="numeric" placeholder="100"></div>
-      <div><label>หน่วย</label><input id="unit" placeholder="ชุด / ต้น / บาท"></div>
-      <div><label>มูลค่าโดยประมาณ (บาท)</label><input id="value" inputmode="numeric" placeholder="25000"></div>
+    <div class="row2">
+      <div><label>🔢 จำนวน</label><input id="qty" inputmode="numeric" placeholder="เช่น 100"></div>
+      <div><label>หน่วยนับ</label><input id="unit" placeholder="เช่น ชุด / ต้น / กระสอบ"></div>
     </div>
-    <div class="hint">มูลค่าใส่เท่าที่ทราบ ไม่บังคับ — ใช้สรุปภาพรวมการสนับสนุนของจังหวัด</div>
+    <div class="hint">ระบุจำนวนสิ่งของที่มอบให้ พร้อมหน่วยนับ เช่น "เมล็ดพันธุ์ 100 ซอง", "ต้นกล้า 500 ต้น"</div>
 
     <label>👤 ผู้ประสานงาน / เบอร์ติดต่อ</label>
     <input id="contact" placeholder="ชื่อ-สกุล · เบอร์โทร (ไม่บังคับ)">
@@ -163,7 +162,7 @@ function submitSupport(){
   if(!item){ showErr('กรุณาระบุปัจจัย/สิ่งที่นำมามอบ'); return; }
   const payload={centerId:centerId,agency:agency,agencyType:state.type,item:item,category:state.cat,
     qty:document.getElementById('qty').value,unit:document.getElementById('unit').value.trim(),
-    value:document.getElementById('value').value,contact:document.getElementById('contact').value.trim(),
+    contact:document.getElementById('contact').value.trim(),
     note:document.getElementById('note').value.trim()};
   const btn=document.getElementById('btn'); btn.disabled=true; btn.textContent='กำลังบันทึก...';
   jsonp(CONFIG.GAS_URL,{action:'submitSupport',data:JSON.stringify(payload)},r=>{

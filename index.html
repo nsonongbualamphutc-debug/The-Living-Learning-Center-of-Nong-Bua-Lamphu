@@ -1132,7 +1132,7 @@ function renderSupport(){
     st.innerHTML=`
       <div class="sup-stat"><div class="ss-num">${fmt(s.agencyCount||0)}</div><div class="ss-lab">🏛️ หน่วยงานสนับสนุน</div></div>
       <div class="sup-stat"><div class="ss-num">${fmt(s.count||0)}</div><div class="ss-lab">🎁 รายการที่มอบให้</div></div>
-      <div class="sup-stat"><div class="ss-num">${fmt(s.totalValue||0)}</div><div class="ss-lab">💰 มูลค่ารวม (บาท)</div></div>
+      <div class="sup-stat"><div class="ss-num">${fmt(s.totalQty||0)}</div><div class="ss-lab">📦 จำนวนสิ่งของรวม</div></div>
       <div class="sup-stat"><div class="ss-num">${centersSupported}/${CENTERS.length}</div><div class="ss-lab">🏫 ศูนย์ที่ได้รับ</div></div>`;
     const rec=s.recent||[];
     ls.innerHTML=rec.length? rec.map(x=>{
@@ -1147,7 +1147,7 @@ function renderSupport(){
             <span>🏫 ${c?esc(c.name):'—'}</span><span>📅 ${esc(x.time)}</span>
           </div>
         </div>
-        <div class="sr-val">${x.value?fmt(x.value)+' บ.':'—'}<small>มูลค่า</small></div>
+        <div class="sr-val">${x.qty?fmt(x.qty):'—'}<small>${esc(x.unit||'จำนวน')}</small></div>
       </div>`;}).join('')
       : '<div class="sup-empty">ยังไม่มีการบันทึกการสนับสนุนในช่วงเวลานี้ — เชิญชวนหน่วยงานสแกน QR เพื่อลงทะเบียน</div>';
   });
