@@ -57,6 +57,30 @@ textarea{resize:vertical;min-height:64px}
 .bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px}
 .who{font-family:'Kanit';color:var(--forest-800);font-weight:500}
 .demo{background:var(--gold-soft);color:#7a5a14;text-align:center;padding:10px;font-size:13px;border-radius:10px;margin-top:14px;display:none}
+
+/* image slots */
+.img-slots{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(min-width:760px){.img-slots{grid-template-columns:repeat(4,1fr)}}
+.slot{border:1.5px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.slot.main{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,150,43,.13)}
+.slot-head{font-family:'Kanit';font-size:12.5px;font-weight:500;padding:8px 11px;background:var(--cream);color:var(--forest-800);
+  display:flex;align-items:center;justify-content:space-between;gap:6px}
+.slot.main .slot-head{background:var(--gold-soft);color:#7a5a14}
+.slot-prev{aspect-ratio:4/3;background:var(--cream);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.slot-prev img{width:100%;height:100%;object-fit:cover}
+.slot-prev .sp-empty{color:var(--muted);font-size:12px;text-align:center;font-family:'Kanit'}
+.slot-prev .sp-empty i{display:block;font-size:26px;font-style:normal;margin-bottom:3px;opacity:.5}
+.slot-body{padding:9px 10px;display:flex;flex-direction:column;gap:7px}
+.slot-body input[type=text]{font-size:11.5px;padding:7px 9px;border-radius:8px}
+.slot-btns{display:flex;gap:6px}
+.slot-btns label,.slot-btns button{flex:1;font-family:'Kanit';font-size:12px;padding:7px 6px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--line);background:#fff;color:var(--forest-800);text-align:center;transition:.15s}
+.slot-btns label:hover{background:var(--leaf-soft);border-color:var(--leaf)}
+.slot-btns button.del{color:#b3261e;border-color:#f0d5d2}
+.slot-btns button.del:hover{background:#fbe7e6}
+.slot-btns input[type=file]{display:none}
+.slot-status{font-size:11px;color:var(--muted);min-height:14px;font-family:'Kanit'}
+.slot-status.ok{color:var(--leaf)} .slot-status.bad{color:#b3261e}
 </style>
 </head>
 <body>
@@ -121,15 +145,9 @@ textarea{resize:vertical;min-height:64px}
       </fieldset>
 
       <fieldset class="fieldset"><legend>รูปภาพ & วิดีโอ</legend>
-        <label>อัปโหลดรูปภาพ (ขึ้น Google Drive อัตโนมัติ)</label>
-        <input id="f_upload" type="file" accept="image/*" multiple onchange="uploadImages(this)">
-        <div class="hint" id="upStatus">เลือกรูปเพื่ออัปโหลด ระบบจะวางลิงก์ให้อัตโนมัติ (รูปแรกเป็นรูปหลัก)</div>
-        <label>ลิงก์รูปภาพ (คั่นแต่ละรูปด้วย | )</label>
-        <textarea id="f_images" placeholder="images/center0-1.jpg | https://drive.google.com/file/d/XXXX/view"></textarea>
-        <div class="hint"><b>วิธีที่แนะนำ (เสถียรที่สุด):</b> อัปรูปไว้ในโฟลเดอร์ <code>images/</code> ของ GitHub repo แล้วใส่ชื่อไฟล์ เช่น <code>images/center0-1.jpg</code><br>
-        <b>หรือใช้ Google Drive:</b> แชร์รูปแบบ "ทุกคนที่มีลิงก์" → คัดลอกลิงก์มาวางได้เลย (ระบบแปลงให้อัตโนมัติ)<br>
-        รูปแรก = รูปหลัก · ใส่ได้สูงสุด 4 รูป</div>
-        <label>ลิงก์วิดีโอ YouTube (แบบฝัง)</label>
+        <div class="hint" style="margin-bottom:12px">จัดการรูปได้ทีละช่อง — <b>ช่องที่ 1 = รูปหลัก</b> (แสดงเป็นภาพใหญ่) · กดเลือกไฟล์เพื่ออัปโหลด หรือวางลิงก์เองก็ได้</div>
+        <div class="img-slots" id="imgSlots"></div>
+        <label style="margin-top:18px">ลิงก์วิดีโอ YouTube (แบบฝัง)</label>
         <input id="f_video" placeholder="https://www.youtube.com/embed/XXXX">
         <div class="hint">นำรหัสหลัง watch?v= มาต่อท้าย .../embed/ เช่น youtube.com/embed/abc123</div>
       </fieldset>
@@ -267,7 +285,10 @@ function fill(c){
   set('f_name',c.name);document.getElementById('f_type').value=c.type;set('f_tambon',c.tambon);set('f_emoji',c.emoji);
   set('f_contact',c.contact);set('f_phone',c.phone);set('f_highlight',c.highlight);
   set('f_lat',c.lat);set('f_lng',c.lng);set('f_hours',c.hours);document.getElementById('f_openDays').value=c.openDays||'ทุกวัน';set('f_capacity',c.capacity);
-  set('f_images',(c.images||[]).join(' | '));set('f_video',c.video);
+  set('f_video',c.video);
+  IMGS=['','','',''];
+  (c.images||[]).slice(0,4).forEach((u,i)=>IMGS[i]=u);
+  renderSlots();
   set('f_story',(c.story||[]).join('|||'));set('f_tags',(c.tags||[]).join('|'));set('f_products',(c.products||[]).join('|'));
   set('f_bases',JSON.stringify(c.bases||[]));
   ['parking','toilet','food','stay','meeting'].forEach(k=>document.getElementById('f_'+k).checked=!!(c.amenities&&c.amenities[k]));
@@ -278,7 +299,7 @@ function save(){
     name:v('f_name'),type:v('f_type'),tambon:v('f_tambon'),emoji:v('f_emoji'),
     contact:v('f_contact'),phone:v('f_phone'),highlight:v('f_highlight'),
     lat:v('f_lat'),lng:v('f_lng'),hours:v('f_hours'),openDays:v('f_openDays'),capacity:v('f_capacity'),
-    images:v('f_images').split('|').map(s=>s.trim()).filter(Boolean).join('|'),
+    images:IMGS.filter(Boolean).join('|'),
     video:v('f_video'),
     story:v('f_story'),tags:v('f_tags'),products:v('f_products'),bases:v('f_bases'),
     parking:document.getElementById('f_parking').checked,toilet:document.getElementById('f_toilet').checked,
@@ -297,26 +318,50 @@ function save(){
 }
 function logout(){ location.reload(); }
 
-/* ---- image upload to Drive via POST ---- */
+/* ===== จัดการรูปแบบแยกช่อง (4 ช่อง) ===== */
+let IMGS=['','','',''];
+function imgURL(u){
+  if(!u) return '';
+  u=String(u).trim();
+  const m = u.match(/drive\.google\.com\/file\/d\/([-\w]{20,})/)
+         || u.match(/[?&]id=([-\w]{20,})/);
+  if(m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w800`;
+  return u;
+}
+function renderSlots(){
+  document.getElementById('imgSlots').innerHTML=IMGS.map((u,i)=>{
+    const prev=u?`<img src="${imgURL(u)}" alt="" onerror="this.outerHTML='<div class=\\'sp-empty\\'><i>⚠️</i>ลิงก์เสีย</div>'">`
+                :`<div class="sp-empty"><i>📷</i>ยังไม่มีรูป</div>`;
+    return `<div class="slot ${i===0?'main':''}">
+      <div class="slot-head"><span>${i===0?'⭐ รูปหลัก':'รูปที่ '+(i+1)}</span></div>
+      <div class="slot-prev">${prev}</div>
+      <div class="slot-body">
+        <input type="text" id="img_${i}" value="${u.replace(/"/g,'&quot;')}" placeholder="วางลิงก์รูป..." oninput="setImg(${i},this.value)">
+        <div class="slot-btns">
+          <label>📤 อัปโหลด<input type="file" accept="image/*" onchange="uploadSlot(${i},this)"></label>
+          ${u?`<button type="button" class="del" onclick="clearImg(${i})">🗑 ลบ</button>`:''}
+        </div>
+        <div class="slot-status" id="st_${i}"></div>
+      </div></div>`;
+  }).join('');
+}
+function setImg(i,v){ IMGS[i]=v.trim(); }
+function clearImg(i){ IMGS[i]=''; renderSlots(); }
 function fileToB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
-async function uploadImages(input){
-  const files=[...input.files]; if(!files.length) return;
-  const st=document.getElementById('upStatus');
-  if(!CONFIG.GAS_URL){ st.textContent='⚠️ ยังไม่ได้เชื่อมระบบหลังบ้าน — กรุณาวางลิงก์เองในช่องด้านล่าง'; return; }
-  const box=document.getElementById('f_images');
-  let done=0;
-  for(const f of files){
-    st.textContent=`กำลังอัปโหลด ${done+1}/${files.length} ...`;
-    try{
-      const b64=await fileToB64(f);
-      const res=await fetch(CONFIG.GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body:JSON.stringify({action:'uploadImage',token:TOKEN,name:f.name,mime:f.type,data:b64})});
-      const j=await res.json();
-      if(j&&j.ok&&j.url){ box.value=(box.value.trim()?box.value.trim()+' | ':'')+j.url; done++; }
-      else { st.textContent='✗ อัปโหลดไม่สำเร็จ: '+((j&&j.error)||'')+' — ลองวางลิงก์เอง'; return; }
-    }catch(err){ st.textContent='✗ อัปโหลดไม่ได้ (เครือข่าย/สิทธิ์) — กรุณาวางลิงก์เองในช่องด้านล่าง'; return; }
-  }
-  st.textContent=`✓ อัปโหลดสำเร็จ ${done} รูป — อย่าลืมกดบันทึก`;
+async function uploadSlot(i,input){
+  const f=input.files[0]; if(!f) return;
+  const st=document.getElementById('st_'+i);
+  if(!CONFIG.GAS_URL){ st.className='slot-status bad'; st.textContent='ยังไม่ได้เชื่อมระบบ'; return; }
+  st.className='slot-status'; st.textContent='กำลังอัปโหลด...';
+  try{
+    const b64=await fileToB64(f);
+    const res=await fetch(CONFIG.GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'uploadImage',token:TOKEN,name:f.name,mime:f.type,data:b64})});
+    const j=await res.json();
+    if(j&&j.ok&&j.url){ IMGS[i]=j.url; renderSlots();
+      const s2=document.getElementById('st_'+i); s2.className='slot-status ok'; s2.textContent='✓ อัปโหลดแล้ว — กดบันทึกด้วย';
+    } else { st.className='slot-status bad'; st.textContent='✗ '+((j&&j.error)||'ไม่สำเร็จ'); }
+  }catch(err){ st.className='slot-status bad'; st.textContent='✗ อัปโหลดไม่ได้ ลองวางลิงก์แทน'; }
   input.value='';
 }
 
